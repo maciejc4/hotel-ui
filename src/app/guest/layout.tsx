@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Home, Info, MessageCircle, AlertTriangle, User } from "lucide-react";
+import { Home, Info, MessageCircle, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useHotel } from "@/contexts/HotelContext";
 import { cn } from "@/lib/utils";
@@ -42,19 +42,19 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
                         </span>
                     </div>
                     <div>
-                        <h2 className="text-sm font-bold text-white leading-tight truncate max-w-[180px]">{branding.name}</h2>
-                        <p className="text-[11px] text-white/50 font-medium">Room {session.roomNumber} • {session.guestName}</p>
+                        <h2 className="text-sm font-bold text-[var(--color-text-main)] leading-tight truncate max-w-[180px]">{branding.name}</h2>
+                        <p className="text-[11px] text-[var(--color-text-muted)] font-medium">Room {session.roomNumber} • {session.guestName}</p>
                     </div>
                 </div>
             </header>
 
-            {/* Main content */}
-            <main className="flex-1 overflow-y-auto pb-24">
+            {/* Main content — pb-28 ensures content never hides behind fixed bottom nav */}
+            <main className="flex-1 overflow-y-auto pb-28">
                 {children}
             </main>
 
             {/* Bottom Tab Bar */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 glass-panel-heavy">
+            <nav className="fixed bottom-0 left-0 right-0 z-50 glass-panel-heavy safe-area-bottom">
                 <div className="flex items-center justify-around py-2 px-2 max-w-lg mx-auto">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href || (tab.href !== "/guest" && pathname.startsWith(tab.href));
@@ -64,7 +64,7 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
                                 onClick={() => router.push(tab.href)}
                                 className={cn(
                                     "flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 relative",
-                                    isActive ? "text-primary" : "text-white/40 hover:text-white/70"
+                                    isActive ? "text-primary" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
                                 )}
                             >
                                 {isActive && (

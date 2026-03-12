@@ -32,7 +32,7 @@ export function TicketChatClient() {
 
     if (!ticket) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-white/30">
+            <div className="flex flex-col items-center justify-center h-[60vh] text-[var(--color-text-muted)]">
                 <p>Ticket not found</p>
                 <Button variant="ghost" className="mt-4 text-primary" onClick={() => router.push("/guest/tickets")}>
                     Back to Tickets
@@ -71,21 +71,21 @@ export function TicketChatClient() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-8rem)] max-w-2xl mx-auto">
-            <div className="px-4 py-3 border-b border-white/10 glass-panel-heavy">
+        <div className="flex flex-col h-[calc(100vh-12rem)] max-w-2xl mx-auto">
+            <div className="px-4 py-3 border-b border-gray-200/60 glass-panel-heavy">
                 <div className="flex items-center gap-3 mb-2">
-                    <button onClick={() => router.push("/guest/tickets")} className="text-white/50 hover:text-white transition-colors">
+                    <button onClick={() => router.push("/guest/tickets")} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-bold text-white/50">{ticket.id}</span>
+                            <span className="text-xs font-mono font-bold text-[var(--color-text-muted)]">{ticket.id}</span>
                             <Badge variant={statusColor(ticket.status)} className="text-[10px]">{ticket.status}</Badge>
                         </div>
-                        <p className="text-sm font-bold text-white truncate">{ticket.issue}</p>
+                        <p className="text-sm font-bold text-[var(--color-text-main)] truncate">{ticket.issue}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-white/30 ml-8">
+                <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] ml-8">
                     <span className="flex items-center gap-1"><Tag className="w-3 h-3" />{ticket.category}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(ticket.createdAt).toLocaleDateString()}</span>
                 </div>
@@ -93,7 +93,7 @@ export function TicketChatClient() {
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
                 <div className="text-center">
-                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">Ticket Chat — {ticket.category}</span>
+                    <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Ticket Chat — {ticket.category}</span>
                 </div>
 
                 {ticket.messages.map((msg) => (
@@ -108,8 +108,8 @@ export function TicketChatClient() {
                             {msg.sender === "guest" ? <User size={12} className="text-white" /> : <Bot size={12} className="text-white" />}
                         </div>
                         <div className={`px-4 py-2.5 rounded-2xl max-w-[75%] text-sm ${msg.sender === "guest"
-                            ? "bg-primary text-white rounded-tr-sm"
-                            : "glass-panel text-white rounded-tl-sm"
+                                ? "bg-primary text-white rounded-tr-sm"
+                                : "glass-panel text-[var(--color-text-main)] rounded-tl-sm"
                             }`}>
                             {msg.text}
                             <p className="text-[10px] opacity-40 mt-1">
@@ -121,21 +121,21 @@ export function TicketChatClient() {
             </div>
 
             {ticket.status !== "Closed" ? (
-                <div className="p-3 glass-panel-heavy border-t border-white/10 flex gap-2">
+                <div className="p-3 glass-panel-heavy border-t border-gray-200/60 flex gap-2">
                     <input
                         type="text"
                         placeholder="Message about this issue..."
-                        className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="flex-1 bg-white/50 border border-gray-200 rounded-full px-4 py-3 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/50"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     />
-                    <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary" onClick={handleSend} disabled={!input.trim()}>
+                    <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary text-white" onClick={handleSend} disabled={!input.trim()}>
                         <Send className="w-4 h-4" />
                     </Button>
                 </div>
             ) : (
-                <div className="p-4 text-center text-white/30 text-sm border-t border-white/10">
+                <div className="p-4 text-center text-[var(--color-text-muted)] text-sm border-t border-gray-200/60">
                     This ticket has been closed. Create a new one if the issue persists.
                 </div>
             )}

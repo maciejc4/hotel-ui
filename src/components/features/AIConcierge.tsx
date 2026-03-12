@@ -35,10 +35,10 @@ export function AIConcierge() {
                 <Button
                     variant="default"
                     size="icon"
-                    className="w-14 h-14 rounded-full shadow-2xl bg-gradient-to-br from-primary to-accent border-0 glow-primary hover:scale-105 active:scale-95 transition-transform"
+                    className="w-14 h-14 rounded-full shadow-2xl bg-gradient-to-br from-primary to-accent border-0 glow-primary hover:scale-105 active:scale-95 transition-transform text-white"
                     onClick={() => setIsOpen(true)}
                 >
-                    <Sparkles className="w-6 h-6 text-white" />
+                    <Sparkles className="w-6 h-6" />
                 </Button>
             </div>
 
@@ -63,7 +63,7 @@ export function AIConcierge() {
                         </div>
 
                         {/* Chat Area */}
-                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-gray-900/50">
+                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-gray-50/80">
                             {messages.map((msg, idx) => (
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
@@ -75,7 +75,7 @@ export function AIConcierge() {
                                         {msg.isBot ? <Bot size={12} className="text-white" /> : <User size={12} className="text-white" />}
                                     </div>
                                     <div className={`px-4 py-2.5 rounded-2xl max-w-[80%] text-sm ${msg.isBot
-                                            ? "glass-panel text-white rounded-tl-sm"
+                                            ? "bg-white text-[var(--color-text-main)] rounded-tl-sm shadow-sm border border-gray-100"
                                             : "bg-primary text-white rounded-tr-sm"
                                         }`}>
                                         {msg.text}
@@ -85,16 +85,16 @@ export function AIConcierge() {
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-3 glass-panel border-t border-white/10 flex gap-2">
+                        <div className="p-3 bg-white border-t border-gray-200 flex gap-2">
                             <input
                                 type="text"
                                 placeholder="Ask me anything..."
-                                className="flex-1 bg-white/5 rounded-full px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                className="flex-1 bg-gray-50 rounded-full px-4 py-2.5 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/50"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
                             />
-                            <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary" onClick={handleSend} disabled={!input.trim()}>
+                            <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary text-white" onClick={handleSend} disabled={!input.trim()}>
                                 <Send className="w-4 h-4" />
                             </Button>
                         </div>

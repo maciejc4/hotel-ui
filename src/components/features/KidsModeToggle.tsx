@@ -35,7 +35,7 @@ export function KidsModeToggle() {
         <div className="flex items-center gap-2">
             <span className={cn(
                 "text-[10px] font-bold uppercase tracking-wider transition-colors duration-300",
-                isKidsMode ? "text-yellow-400" : "text-white/30"
+                isKidsMode ? "text-amber-600" : "text-[var(--color-text-muted)]"
             )}>
                 {isKidsMode ? "🧒 Kids" : "Kids"}
             </span>
@@ -45,7 +45,7 @@ export function KidsModeToggle() {
                     "relative flex h-10 w-20 cursor-pointer items-center rounded-full p-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                     isKidsMode
                         ? "bg-gradient-to-r from-yellow-400 to-emerald-400 shadow-[0_0_20px_rgba(250,204,21,0.4)]"
-                        : "bg-white/15 hover:bg-white/20"
+                        : "bg-gray-200 hover:bg-gray-300"
                 )}
                 aria-label="Toggle Kids Mode"
             >

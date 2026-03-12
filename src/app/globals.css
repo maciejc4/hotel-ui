@@ -9,56 +9,53 @@
 }
 
 :root {
-  --color-bg-base: #161627;
-  --color-surface-base: rgba(255, 255, 255, 0.08);
-  --color-primary-base: #38bdf8;
-  --color-accent-base: #f472b6;
-  --color-text-main: #f1f5f9;
+  --color-bg-base: #fdf8f4;
+  --color-surface-base: rgba(255, 255, 255, 0.85);
+  --color-primary-base: #e17055;
+  --color-accent-base: #6c5ce7;
+  --color-text-main: #2d3436;
+  --color-text-muted: #636e72;
 }
 
-/* ═══════ Kids Mode — Fun, bright, bubbly ═══════ */
+/* ═══════ Kids Mode — Fun, bright, playful on light ═══════ */
 .kids-mode {
-  --color-bg-base: #1c1035;
-  --color-surface-base: rgba(255, 255, 255, 0.10);
-  --color-primary-base: #facc15;
-  --color-accent-base: #34d399;
-  --color-text-main: #fef9c3;
-}
-
-.kids-mode body,
-body.kids-mode {
-  background: var(--color-bg-base);
+  --color-bg-base: #fffbeb;
+  --color-surface-base: rgba(255, 255, 255, 0.90);
+  --color-primary-base: #f59e0b;
+  --color-accent-base: #10b981;
+  --color-text-main: #1e293b;
+  --color-text-muted: #64748b;
 }
 
 .kids-mode .gradient-mesh {
   background:
-    radial-gradient(ellipse at 10% 20%, rgba(250, 204, 21, 0.30) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 10%, rgba(52, 211, 153, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(251, 146, 60, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 90%, rgba(168, 85, 247, 0.20) 0%, transparent 50%),
+    radial-gradient(ellipse at 10% 20%, rgba(245, 158, 11, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(251, 146, 60, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 90%, rgba(168, 85, 247, 0.10) 0%, transparent 50%),
     var(--color-bg-base);
   background-size: 200% 200%;
   animation: meshShift 14s ease-in-out infinite;
 }
 
 .kids-mode .glass-panel {
-  background: rgba(250, 204, 21, 0.08);
-  border: 1px solid rgba(250, 204, 21, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(250, 204, 21, 0.10);
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .kids-mode .glass-panel-heavy {
-  background: rgba(250, 204, 21, 0.12);
-  border: 1px solid rgba(250, 204, 21, 0.22);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(250, 204, 21, 0.15);
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.20);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .kids-mode .glow-primary {
-  box-shadow: 0 0 24px rgba(250, 204, 21, 0.4);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
 }
 
 .kids-mode .glow-accent {
-  box-shadow: 0 0 24px rgba(52, 211, 153, 0.4);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
 }
 
 /* Admin theme — clean and utilitarian */
@@ -76,13 +73,13 @@ body {
   @apply transition-colors duration-500 ease-in-out antialiased;
 }
 
-/* ═══════ Animated Gradient Mesh (Guest PWA) ═══════ */
+/* ═══════ Morning Light Gradient Mesh ═══════ */
 .gradient-mesh {
   background:
-    radial-gradient(ellipse at 10% 20%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 10%, rgba(168, 85, 247, 0.16) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(244, 114, 182, 0.16) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 90%, rgba(45, 212, 191, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 10% 20%, rgba(225, 112, 85, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%, rgba(108, 92, 231, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(253, 203, 110, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 90%, rgba(129, 236, 236, 0.08) 0%, transparent 50%),
     var(--color-bg-base);
   background-size: 200% 200%;
   animation: meshShift 20s ease-in-out infinite;
@@ -108,21 +105,21 @@ body {
   }
 }
 
-/* ═══════ Glassmorphism 2.0 ═══════ */
+/* ═══════ Glassmorphism — Light Mode ═══════ */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .glass-panel-heavy {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.70);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 /* Admin glass — clean and opaque */
@@ -144,35 +141,19 @@ body {
   scrollbar-width: none;
 }
 
-/* Text colors for guest (light text on dark bg) */
-.guest-text {
-  color: #f1f5f9;
-}
-
-.guest-text-muted {
-  color: rgba(241, 245, 249, 0.6);
-}
-
-/* Glow effects */
+/* Glow effects — soft on light */
 .glow-primary {
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 16px rgba(225, 112, 85, 0.20);
 }
 
 .glow-accent {
-  box-shadow: 0 0 18px rgba(244, 114, 182, 0.25);
+  box-shadow: 0 0 16px rgba(108, 92, 231, 0.20);
 }
 
 /* ═══════ Kids Mode Extras ═══════ */
 @keyframes kidsBounce {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.15);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
 }
 
 .kids-bounce {

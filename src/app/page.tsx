@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { LockKeyhole, ArrowRight, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -55,8 +55,8 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen gradient-mesh flex items-center justify-center p-4 relative overflow-hidden">
       {/* Decorative orbs */}
-      <div className="absolute top-[10%] left-[5%] w-64 h-64 rounded-full bg-primary/20 blur-[80px] animate-pulse" />
-      <div className="absolute bottom-[15%] right-[10%] w-48 h-48 rounded-full bg-accent/20 blur-[60px] animate-pulse" />
+      <div className="absolute top-[10%] left-[5%] w-64 h-64 rounded-full bg-primary/15 blur-[80px] animate-pulse" />
+      <div className="absolute bottom-[15%] right-[10%] w-48 h-48 rounded-full bg-accent/15 blur-[60px] animate-pulse" />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -72,49 +72,49 @@ export default function OnboardingPage() {
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-main)]">
             Welcome to Room {room?.number || "204"}
           </h1>
-          <p className="text-sm text-white/60 mt-2 font-medium">
+          <p className="text-sm text-[var(--color-text-muted)] mt-2 font-medium">
             {branding.name}
           </p>
         </div>
 
         {stay && (
           <div className="glass-panel rounded-2xl p-4 mb-6 text-center">
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-[var(--color-text-muted)]">
               Please verify your identity,{" "}
-              <span className="font-bold text-white">{stay.guestName}</span>
+              <span className="font-bold text-[var(--color-text-main)]">{stay.guestName}</span>
             </p>
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider font-bold text-white/60">
+            <label className="text-xs uppercase tracking-wider font-bold text-[var(--color-text-muted)]">
               Date of Birth
             </label>
             <div className="relative">
-              <LockKeyhole className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+              <LockKeyhole className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" />
               <input
                 type="date"
                 value={dob}
                 onChange={(e) => { setDob(e.target.value); setError(""); }}
-                className="w-full h-14 glass-panel rounded-2xl pl-12 pr-4 text-sm font-medium text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow bg-transparent"
+                className="w-full h-14 glass-panel rounded-2xl pl-12 pr-4 text-sm font-medium text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow bg-transparent"
               />
             </div>
-            {error && <p className="text-xs text-red-400 mt-1 font-medium px-2">{error}</p>}
+            {error && <p className="text-xs text-red-500 mt-1 font-medium px-2">{error}</p>}
           </div>
 
-          <Button type="submit" variant="default" size="lg" className="w-full h-14 text-base bg-gradient-to-r from-primary to-accent border-0 glow-primary">
+          <Button type="submit" variant="default" size="lg" className="w-full h-14 text-base bg-gradient-to-r from-primary to-accent border-0 text-white glow-primary">
             Access Your Stay
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </form>
 
         <div className="flex items-center justify-center gap-2 mt-6">
-          <Globe className="w-3.5 h-3.5 text-white/40" />
-          <span className="text-xs text-white/40 font-medium uppercase">{detectedLang}</span>
+          <Globe className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+          <span className="text-xs text-[var(--color-text-muted)] font-medium uppercase">{detectedLang}</span>
         </div>
       </motion.div>
     </div>

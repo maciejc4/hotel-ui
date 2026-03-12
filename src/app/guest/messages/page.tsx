@@ -58,11 +58,11 @@ export default function GuestMessagesPage() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-8rem)] max-w-2xl mx-auto">
+        <div className="flex flex-col h-[calc(100vh-12rem)] max-w-2xl mx-auto">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-white/10">
-                <h1 className="text-lg font-bold text-white">Chat with Reception</h1>
-                <p className="text-xs text-white/40">We typically reply within a few minutes</p>
+            <div className="px-4 py-3 border-b border-gray-200/60">
+                <h1 className="text-lg font-bold text-[var(--color-text-main)]">Chat with Reception</h1>
+                <p className="text-xs text-[var(--color-text-muted)]">We typically reply within a few minutes</p>
             </div>
 
             {/* Messages */}
@@ -80,14 +80,14 @@ export default function GuestMessagesPage() {
                         </div>
                         <div className={`px-4 py-2.5 rounded-2xl max-w-[75%] text-sm ${msg.sender === "guest"
                                 ? "bg-primary text-white rounded-tr-sm"
-                                : "glass-panel text-white rounded-tl-sm"
+                                : "glass-panel text-[var(--color-text-main)] rounded-tl-sm"
                             }`}>
                             {msg.text}
                         </div>
                     </motion.div>
                 ))}
                 {(!conversation || conversation.messages.length === 0) && (
-                    <div className="text-center text-white/30 text-sm py-12">
+                    <div className="text-center text-[var(--color-text-muted)] text-sm py-12">
                         <Bot className="w-12 h-12 mx-auto mb-3 opacity-30" />
                         <p>Send a message to the reception</p>
                     </div>
@@ -95,16 +95,16 @@ export default function GuestMessagesPage() {
             </div>
 
             {/* Input */}
-            <div className="p-3 glass-panel-heavy border-t border-white/10 flex gap-2">
+            <div className="p-3 glass-panel-heavy border-t border-gray-200/60 flex gap-2">
                 <input
                     type="text"
                     placeholder="Type your message..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="flex-1 bg-white/50 border border-gray-200 rounded-full px-4 py-3 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/50"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 />
-                <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary" onClick={handleSend} disabled={!input.trim()}>
+                <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary text-white" onClick={handleSend} disabled={!input.trim()}>
                     <Send className="w-4 h-4" />
                 </Button>
             </div>
