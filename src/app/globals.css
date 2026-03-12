@@ -1,26 +1,180 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-jakarta);
+  --color-primary: var(--color-primary-base);
+  --color-accent: var(--color-accent-base);
+  --color-background: var(--color-bg-base);
+  --color-surface: var(--color-surface-base);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg-base: #161627;
+  --color-surface-base: rgba(255, 255, 255, 0.08);
+  --color-primary-base: #38bdf8;
+  --color-accent-base: #f472b6;
+  --color-text-main: #f1f5f9;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ═══════ Kids Mode — Fun, bright, bubbly ═══════ */
+.kids-mode {
+  --color-bg-base: #1c1035;
+  --color-surface-base: rgba(255, 255, 255, 0.10);
+  --color-primary-base: #facc15;
+  --color-accent-base: #34d399;
+  --color-text-main: #fef9c3;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.kids-mode body,
+body.kids-mode {
+  background: var(--color-bg-base);
+}
+
+.kids-mode .gradient-mesh {
+  background:
+    radial-gradient(ellipse at 10% 20%, rgba(250, 204, 21, 0.30) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%, rgba(52, 211, 153, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(251, 146, 60, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 90%, rgba(168, 85, 247, 0.20) 0%, transparent 50%),
+    var(--color-bg-base);
+  background-size: 200% 200%;
+  animation: meshShift 14s ease-in-out infinite;
+}
+
+.kids-mode .glass-panel {
+  background: rgba(250, 204, 21, 0.08);
+  border: 1px solid rgba(250, 204, 21, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(250, 204, 21, 0.10);
+}
+
+.kids-mode .glass-panel-heavy {
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(250, 204, 21, 0.15);
+}
+
+.kids-mode .glow-primary {
+  box-shadow: 0 0 24px rgba(250, 204, 21, 0.4);
+}
+
+.kids-mode .glow-accent {
+  box-shadow: 0 0 24px rgba(52, 211, 153, 0.4);
+}
+
+/* Admin theme — clean and utilitarian */
+.admin-theme {
+  --color-bg-base: #f8fafc;
+  --color-surface-base: #ffffff;
+  --color-primary-base: #1e40af;
+  --color-accent-base: #dc2626;
+  --color-text-main: #1e293b;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg-base);
+  color: var(--color-text-main);
+  @apply transition-colors duration-500 ease-in-out antialiased;
+}
+
+/* ═══════ Animated Gradient Mesh (Guest PWA) ═══════ */
+.gradient-mesh {
+  background:
+    radial-gradient(ellipse at 10% 20%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%, rgba(168, 85, 247, 0.16) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(244, 114, 182, 0.16) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 90%, rgba(45, 212, 191, 0.12) 0%, transparent 50%),
+    var(--color-bg-base);
+  background-size: 200% 200%;
+  animation: meshShift 20s ease-in-out infinite;
+}
+
+@keyframes meshShift {
+
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+
+  25% {
+    background-position: 100% 0%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
+
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+/* ═══════ Glassmorphism 2.0 ═══════ */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.glass-panel-heavy {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+}
+
+/* Admin glass — clean and opaque */
+.admin-theme .glass-panel,
+.admin-theme .glass-panel-heavy {
+  background: #ffffff;
+  backdrop-filter: none;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ═══════ Utilities ═══════ */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Text colors for guest (light text on dark bg) */
+.guest-text {
+  color: #f1f5f9;
+}
+
+.guest-text-muted {
+  color: rgba(241, 245, 249, 0.6);
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+}
+
+.glow-accent {
+  box-shadow: 0 0 18px rgba(244, 114, 182, 0.25);
+}
+
+/* ═══════ Kids Mode Extras ═══════ */
+@keyframes kidsBounce {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.kids-bounce {
+  animation: kidsBounce 0.4s ease-in-out;
 }
