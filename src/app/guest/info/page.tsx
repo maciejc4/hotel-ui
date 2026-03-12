@@ -129,19 +129,27 @@ export default function GuestInfoPage() {
                     <h2 className="text-base font-bold text-[var(--color-text-main)]">SPA & Wellness</h2>
                     <p className="text-sm text-[var(--color-text-muted)]">Open 08:00–20:00 • Pre-booking required</p>
                     {MOCK_SPA.map(s => (
-                        <div key={s.id} className="glass-panel rounded-2xl p-4 flex items-center justify-between">
-                            <div>
-                                <h3 className="font-bold text-[var(--color-text-main)]">{s.name}</h3>
-                                <div className="flex items-center gap-3 mt-1 text-xs text-[var(--color-text-muted)]">
-                                    <span><Clock className="w-3 h-3 inline mr-1" />{s.duration}</span>
-                                    <span className="font-bold text-primary">{s.price}</span>
+                        <div key={s.id} className="glass-panel rounded-2xl p-4">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-[var(--color-text-main)]">{s.name}</h3>
+                                    <div className="flex items-center gap-3 mt-1.5 text-xs text-[var(--color-text-muted)]">
+                                        <span><Clock className="w-3 h-3 inline mr-1" />{s.duration}</span>
+                                        <span className="font-bold text-primary">{s.price}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1.5 text-xs text-[var(--color-text-muted)]">
+                                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{s.location}</span>
+                                        <span className="flex items-center gap-1">👤 {s.therapist}</span>
+                                    </div>
+                                </div>
+                                <div className="ml-3">
+                                    {s.available ? (
+                                        <Button variant="glass" size="sm" className="text-[var(--color-text-main)] border-gray-200" onClick={() => showToast(`${s.name} booked!`)}>Book</Button>
+                                    ) : (
+                                        <Badge variant="destructive" className="text-[10px]">Full</Badge>
+                                    )}
                                 </div>
                             </div>
-                            {s.available ? (
-                                <Button variant="glass" size="sm" className="text-[var(--color-text-main)] border-gray-200" onClick={() => showToast(`${s.name} booked!`)}>Book</Button>
-                            ) : (
-                                <Badge variant="destructive" className="text-[10px]">Full</Badge>
-                            )}
                         </div>
                     ))}
                 </motion.div>
@@ -153,17 +161,22 @@ export default function GuestInfoPage() {
                     <h2 className="text-base font-bold text-[var(--color-text-main)]">Fitness & Classes</h2>
                     <p className="text-sm text-[var(--color-text-muted)]">Gym open 24/7 with keycard access</p>
                     {MOCK_FITNESS.map(f => (
-                        <div key={f.id} className="glass-panel rounded-2xl p-4 flex items-center justify-between">
-                            <div>
-                                <h3 className="font-bold text-[var(--color-text-main)]">{f.name}</h3>
-                                <div className="flex items-center gap-3 mt-1 text-xs text-[var(--color-text-muted)]">
-                                    <span className="font-bold text-primary">{f.time}</span>
-                                    <span>{f.duration}</span>
-                                    <span>{f.instructor}</span>
+                        <div key={f.id} className="glass-panel rounded-2xl p-4">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-bold text-[var(--color-text-main)]">{f.name}</h3>
+                                        <span className="text-sm font-bold text-primary">{f.time}</span>
+                                    </div>
+                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">{f.description}</p>
+                                    <div className="flex items-center gap-4 mt-2 text-xs text-[var(--color-text-muted)]">
+                                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{f.duration}</span>
+                                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{f.location}</span>
+                                        <span className="flex items-center gap-1">🏋️ {f.instructor}</span>
+                                    </div>
                                 </div>
-                                <p className="text-xs text-[var(--color-text-muted)] mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" />{f.location}</p>
+                                <Button variant="glass" size="sm" className="text-[var(--color-text-main)] border-gray-200 ml-3" onClick={() => showToast(`Joined ${f.name}!`)}>Join</Button>
                             </div>
-                            <Button variant="glass" size="sm" className="text-[var(--color-text-main)] border-gray-200" onClick={() => showToast(`Joined ${f.name}!`)}>Join</Button>
                         </div>
                     ))}
                 </motion.div>

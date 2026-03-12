@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import {
     Ticket, Conversation, ChatMessage, Room, Stay, StaffMember, HotelBranding,
     MOCK_TICKETS, MOCK_MESSAGES, MOCK_ROOMS, MOCK_STAYS, MOCK_STAFF, MOCK_BRANDING,
@@ -18,25 +18,18 @@ interface HotelState {
 }
 
 interface HotelContextType extends HotelState {
-    // Branding
     updateBranding: (b: Partial<HotelBranding>) => void;
-    // Rooms
     addRoom: (room: Room) => void;
     deleteRoom: (id: string) => void;
-    // Stays
     addStay: (stay: Stay) => void;
     deleteStay: (id: string) => void;
-    // Staff
     addStaff: (s: StaffMember) => void;
-    // Tickets
     addTicket: (t: Ticket) => void;
     updateTicketStatus: (id: string, status: Ticket["status"]) => void;
     assignTicket: (id: string, staffId: string) => void;
     addTicketMessage: (ticketId: string, msg: ChatMessage) => void;
-    // Conversations
     addConversationMessage: (convId: string, msg: ChatMessage) => void;
     getOrCreateConversation: (roomId: string, guestName: string) => Conversation;
-    // Guest actions
     requestLateCheckout: () => void;
     addToSchedule: (activityId: string) => void;
     removeFromSchedule: (activityId: string) => void;
@@ -45,12 +38,12 @@ interface HotelContextType extends HotelState {
 const HotelContext = createContext<HotelContextType | null>(null);
 
 export function HotelProvider({ children }: { children: React.ReactNode }) {
-    const [branding, setBranding] = useState<HotelBranding>({ ...MOCK_BRANDING });
-    const [rooms, setRooms] = useState<Room[]>([...MOCK_ROOMS]);
-    const [stays, setStays] = useState<Stay[]>([...MOCK_STAYS]);
-    const [staff, setStaff] = useState<StaffMember[]>([...MOCK_STAFF]);
-    const [tickets, setTickets] = useState<Ticket[]>(MOCK_TICKETS.map(t => ({ ...t, messages: [...t.messages] })));
-    const [conversations, setConversations] = useState<Conversation[]>(MOCK_MESSAGES.map(c => ({ ...c, messages: [...c.messages] })));
+    const [branding, setBranding] = useState<HotelBranding>(() => ({ ...MOCK_BRANDING }));
+    const [rooms, setRooms] = useState<Room[]>(() => [...MOCK_ROOMS]);
+    const [stays, setStays] = useState<Stay[]>(() => [...MOCK_STAYS]);
+    const [staff, setStaff] = useState<StaffMember[]>(() => [...MOCK_STAFF]);
+    const [tickets, setTickets] = useState<Ticket[]>(() => MOCK_TICKETS.map(t => ({ ...t, messages: [...t.messages] })));
+    const [conversations, setConversations] = useState<Conversation[]>(() => MOCK_MESSAGES.map(c => ({ ...c, messages: [...c.messages] })));
     const [lateCheckoutStatus, setLateCheckoutStatus] = useState<null | "pending" | "approved">(null);
     const [userSchedule, setUserSchedule] = useState<string[]>([]);
 
@@ -102,15 +95,23 @@ export function HotelProvider({ children }: { children: React.ReactNode }) {
         ));
     }, []);
 
+    // Fixed: uses functional setState to avoid stale closure over `conversations`
     const getOrCreateConversation = useCallback((roomId: string, guestName: string): Conversation => {
-        const existing = conversations.find(c => c.roomId === roomId);
-        if (existing) return existing;
-        const newConv: Conversation = {
-            id: `conv-${Date.now()}`, roomId, guestName, messages: [], unread: 0,
-        };
-        setConversations(prev => [...prev, newConv]);
-        return newConv;
-    }, [conversations]);
+        let result: Conversation | undefined;
+        setConversations(prev => {
+            const existing = prev.find(c => c.roomId === roomId);
+            if (existing) {
+                result = existing;
+                return prev; // no state change
+            }
+            const newConv: Conversation = {
+                id: `conv-${Date.now()}`, roomId, guestName, messages: [], unread: 0,
+            };
+            result = newConv;
+            return [...prev, newConv];
+        });
+        return result!;
+    }, []);
 
     const requestLateCheckout = useCallback(() => {
         setLateCheckoutStatus("pending");
@@ -125,14 +126,23 @@ export function HotelProvider({ children }: { children: React.ReactNode }) {
         setUserSchedule(prev => prev.filter(id => id !== activityId));
     }, []);
 
+    // Memoize context value to prevent unnecessary re-renders
+    const value = useMemo<HotelContextType>(() => ({
+        branding, rooms, stays, staff, tickets, conversations, lateCheckoutStatus, userSchedule,
+        updateBranding, addRoom, deleteRoom, addStay, deleteStay, addStaff,
+        addTicket, updateTicketStatus, assignTicket, addTicketMessage,
+        addConversationMessage, getOrCreateConversation,
+        requestLateCheckout, addToSchedule, removeFromSchedule,
+    }), [
+        branding, rooms, stays, staff, tickets, conversations, lateCheckoutStatus, userSchedule,
+        updateBranding, addRoom, deleteRoom, addStay, deleteStay, addStaff,
+        addTicket, updateTicketStatus, assignTicket, addTicketMessage,
+        addConversationMessage, getOrCreateConversation,
+        requestLateCheckout, addToSchedule, removeFromSchedule,
+    ]);
+
     return (
-        <HotelContext.Provider value={{
-            branding, rooms, stays, staff, tickets, conversations, lateCheckoutStatus, userSchedule,
-            updateBranding, addRoom, deleteRoom, addStay, deleteStay, addStaff,
-            addTicket, updateTicketStatus, assignTicket, addTicketMessage,
-            addConversationMessage, getOrCreateConversation,
-            requestLateCheckout, addToSchedule, removeFromSchedule,
-        }}>
+        <HotelContext.Provider value={value}>
             {children}
         </HotelContext.Provider>
     );

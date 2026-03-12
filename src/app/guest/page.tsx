@@ -14,9 +14,24 @@ import { AIConcierge } from "@/components/features/AIConcierge";
 import { ResortMap } from "@/components/features/ResortMap";
 import { useRouter } from "next/navigation";
 
+// Explore resort items — filtered based on kids mode
+const EXPLORE_ITEMS_ADULT = [
+    { icon: Utensils, label: "Dining", color: "from-orange-400 to-red-400", tab: "dining" },
+    { icon: Calendar, label: "Activities", color: "from-blue-400 to-cyan-400", tab: "activities" },
+    { icon: Dumbbell, label: "Fitness", color: "from-emerald-400 to-teal-400", tab: "fitness" },
+    { icon: Sparkles, label: "SPA", color: "from-purple-400 to-pink-400", tab: "spa" },
+    { icon: Baby, label: "Kids Club", color: "from-yellow-400 to-orange-400", tab: "kids" },
+    { icon: Car, label: "Car Rental", color: "from-gray-400 to-slate-400", tab: "cars" },
+];
+
+const EXPLORE_ITEMS_KIDS = [
+    { icon: Baby, label: "Kids Club", color: "from-yellow-400 to-orange-400", tab: "kids" },
+    { icon: Calendar, label: "Activities", color: "from-blue-400 to-cyan-400", tab: "activities" },
+];
+
 export default function GuestDashboard() {
     const router = useRouter();
-    const { tickets, lateCheckoutStatus, requestLateCheckout, stays, rooms, addToSchedule, userSchedule } = useHotel();
+    const { tickets, lateCheckoutStatus, requestLateCheckout, stays, addToSchedule, userSchedule } = useHotel();
     const { showToast } = useToast();
     const [showCheckoutModal, setShowCheckoutModal] = React.useState(false);
     const [showMapModal, setShowMapModal] = React.useState(false);
@@ -51,12 +66,19 @@ export default function GuestDashboard() {
         }
     };
 
-    // Today's upcoming activities
+    // Today's upcoming activities — filtered for kids mode
     const now = new Date();
     const currentHour = now.getHours();
-    const upcomingActivities = MOCK_ACTIVITIES.flatMap(a =>
-        a.schedule.filter(e => parseInt(e.time) > currentHour).map(e => ({ ...e, emoji: a.emoji, activityTitle: a.title, activityId: a.id }))
-    ).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 4);
+    const upcomingActivities = React.useMemo(() => {
+        const activities = isKidsMode
+            ? MOCK_ACTIVITIES.filter(a => a.type === "kids")
+            : MOCK_ACTIVITIES;
+        return activities.flatMap(a =>
+            a.schedule.filter(e => parseInt(e.time) > currentHour).map(e => ({ ...e, emoji: a.emoji, activityTitle: a.title, activityId: a.id }))
+        ).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 4);
+    }, [isKidsMode, currentHour]);
+
+    const exploreItems = isKidsMode ? EXPLORE_ITEMS_KIDS : EXPLORE_ITEMS_ADULT;
 
     const container = {
         hidden: { opacity: 0 },
@@ -104,41 +126,88 @@ export default function GuestDashboard() {
                         Checkout at 11:00 AM. Leave keycards on the table when departing.
                     </p>
                     <div className="flex gap-2 flex-wrap">
-                        <Button
-                            variant="glass"
-                            size="sm"
-                            className="text-[var(--color-text-main)] border-[var(--color-surface-base)]"
-                            onClick={() => setShowCheckoutModal(true)}
-                        >
-                            <Key className="w-4 h-4 mr-1" />
-                            {lateCheckoutStatus === "pending" ? "Pending…" : lateCheckoutStatus === "approved" ? "Approved ✓" : "Late Checkout"}
-                        </Button>
+                        {!isKidsMode && (
+                            <Button
+                                variant="glass"
+                                size="sm"
+                                className="text-[var(--color-text-main)] border-[var(--color-surface-base)]"
+                                onClick={() => setShowCheckoutModal(true)}
+                            >
+                                <Key className="w-4 h-4 mr-1" />
+                                {lateCheckoutStatus === "pending" ? "Pending…" : lateCheckoutStatus === "approved" ? "Approved ✓" : "Late Checkout"}
+                            </Button>
+                        )}
                         <Button variant="glass" size="sm" className="text-[var(--color-text-main)] border-[var(--color-surface-base)]" onClick={() => setShowMapModal(true)}>
                             <Map className="w-4 h-4 mr-1" /> Resort Map
                         </Button>
                     </div>
                 </motion.div>
 
-                {/* Quick Actions */}
-                <motion.div variants={item} className="grid grid-cols-2 gap-3">
-                    <button onClick={() => router.push("/guest/messages")} className="glass-panel rounded-2xl p-4 flex flex-col items-start gap-2 hover:bg-white/70 transition-colors text-left">
-                        <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
-                            <MessageCircle className="w-5 h-5 text-blue-500" />
-                        </div>
-                        <span className="text-sm font-bold text-[var(--color-text-main)]">Chat with Reception</span>
-                        <span className="text-xs text-[var(--color-text-muted)]">Ask anything</span>
-                    </button>
-
-                    <button onClick={() => router.push("/guest/tickets")} className="glass-panel rounded-2xl p-4 flex flex-col items-start gap-2 hover:bg-white/70 transition-colors text-left">
-                        <div className="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
-                            <AlertTriangle className="w-5 h-5 text-rose-500" />
-                        </div>
-                        <span className="text-sm font-bold text-[var(--color-text-main)]">Report Issue</span>
-                        {myTickets.length > 0 && (
-                            <span className="text-xs text-accent font-semibold">{myTickets.filter(t => t.status !== "Closed").length} open</span>
-                        )}
-                    </button>
+                {/* Explore Resort Grid — ABOVE quick actions */}
+                <motion.div variants={item}>
+                    <h3 className="text-base font-bold text-[var(--color-text-main)] mb-3 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-accent" /> Explore Resort
+                    </h3>
+                    <div className={`grid gap-3 ${isKidsMode ? "grid-cols-2" : "grid-cols-3"}`}>
+                        {exploreItems.map((it) => (
+                            <button
+                                key={it.label}
+                                onClick={() => router.push(`/guest/info?tab=${it.tab}`)}
+                                className="glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 hover:bg-white/70 transition-all hover:scale-[1.03] active:scale-95"
+                            >
+                                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${it.color} flex items-center justify-center shadow-lg`}>
+                                    <it.icon className="w-6 h-6 text-white" />
+                                </div>
+                                <span className="text-xs font-bold text-[var(--color-text-main)]">{it.label}</span>
+                            </button>
+                        ))}
+                    </div>
                 </motion.div>
+
+                {/* Quick Actions — only in adult mode */}
+                {!isKidsMode && (
+                    <motion.div variants={item} className="grid grid-cols-2 gap-3">
+                        <button onClick={() => router.push("/guest/messages")} className="glass-panel rounded-2xl p-4 flex flex-col items-start gap-2 hover:bg-white/70 transition-colors text-left">
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
+                                <MessageCircle className="w-5 h-5 text-blue-500" />
+                            </div>
+                            <span className="text-sm font-bold text-[var(--color-text-main)]">Chat with Reception</span>
+                            <span className="text-xs text-[var(--color-text-muted)]">Ask anything</span>
+                        </button>
+
+                        <button onClick={() => router.push("/guest/tickets")} className="glass-panel rounded-2xl p-4 flex flex-col items-start gap-2 hover:bg-white/70 transition-colors text-left">
+                            <div className="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
+                                <AlertTriangle className="w-5 h-5 text-rose-500" />
+                            </div>
+                            <span className="text-sm font-bold text-[var(--color-text-main)]">Report Issue</span>
+                            {myTickets.length > 0 && (
+                                <span className="text-xs text-accent font-semibold">{myTickets.filter(t => t.status !== "Closed").length} open</span>
+                            )}
+                        </button>
+                    </motion.div>
+                )}
+
+                {/* Kids Mode: Kids Club Schedule */}
+                {isKidsMode && (
+                    <motion.div variants={item}>
+                        <h3 className="text-base font-bold text-[var(--color-text-main)] mb-3 flex items-center gap-2">
+                            🧒 Today at Kids Club
+                        </h3>
+                        <div className="space-y-2">
+                            {MOCK_KIDS_CLUB.schedule.map((ev, i) => (
+                                <div key={i} className="glass-panel rounded-2xl px-4 py-3 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-bold text-primary text-sm w-12">{ev.time}</span>
+                                        <div>
+                                            <p className="text-sm font-semibold text-[var(--color-text-main)]">{ev.name}</p>
+                                            <p className="text-xs text-[var(--color-text-muted)]">{ev.location}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Today's Highlights */}
                 {upcomingActivities.length > 0 && (
@@ -175,34 +244,6 @@ export default function GuestDashboard() {
                         </div>
                     </motion.div>
                 )}
-
-                {/* Explore Resort Grid */}
-                <motion.div variants={item}>
-                    <h3 className="text-base font-bold text-[var(--color-text-main)] mb-3 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-accent" /> Explore Resort
-                    </h3>
-                    <div className="grid grid-cols-3 gap-3">
-                        {[
-                            { icon: Utensils, label: "Dining", color: "from-orange-400 to-red-400", tab: "dining" },
-                            { icon: Calendar, label: "Activities", color: "from-blue-400 to-cyan-400", tab: "activities" },
-                            { icon: Dumbbell, label: "Fitness", color: "from-emerald-400 to-teal-400", tab: "fitness" },
-                            { icon: Sparkles, label: "SPA", color: "from-purple-400 to-pink-400", tab: "spa" },
-                            { icon: Baby, label: "Kids Club", color: "from-yellow-400 to-orange-400", tab: "kids" },
-                            { icon: Car, label: "Car Rental", color: "from-gray-400 to-slate-400", tab: "cars" },
-                        ].map((item) => (
-                            <button
-                                key={item.label}
-                                onClick={() => router.push(`/guest/info?tab=${item.tab}`)}
-                                className="glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 hover:bg-white/70 transition-all hover:scale-[1.03] active:scale-95"
-                            >
-                                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg`}>
-                                    <item.icon className="w-6 h-6 text-white" />
-                                </div>
-                                <span className="text-xs font-bold text-[var(--color-text-main)]">{item.label}</span>
-                            </button>
-                        ))}
-                    </div>
-                </motion.div>
 
                 {/* Minidisco Banner */}
                 <motion.div variants={item}>

@@ -9,7 +9,7 @@ const Card = React.forwardRef<
         <div
             ref={ref}
             className={cn(
-                "rounded-3xl overflow-hidden transition-all duration-300",
+                "rounded-3xl overflow-hidden transition-all duration-200",
                 {
                     "glass-panel": variant === "default",
                     "glass-panel-heavy": variant === "heavy",

@@ -71,6 +71,8 @@ export interface SpaTreatment {
     duration: string;
     price: string;
     available: boolean;
+    location: string;
+    therapist: string;
 }
 
 export interface FitnessClass {
@@ -80,6 +82,7 @@ export interface FitnessClass {
     duration: string;
     instructor: string;
     location: string;
+    description: string;
 }
 
 export interface KidsClubInfo {
@@ -255,19 +258,19 @@ export const MOCK_ACTIVITIES: Activity[] = [
 
 // ─── SPA ─────────────────────────────────────────────
 export const MOCK_SPA: SpaTreatment[] = [
-    { id: "spa-1", name: "Balinese Massage", duration: "60 min", price: "€80", available: true },
-    { id: "spa-2", name: "Hot Stone Therapy", duration: "75 min", price: "€95", available: true },
-    { id: "spa-3", name: "Aromatherapy Facial", duration: "45 min", price: "€65", available: false },
-    { id: "spa-4", name: "Couple's Retreat", duration: "90 min", price: "€160", available: true },
-    { id: "spa-5", name: "Deep Tissue Massage", duration: "60 min", price: "€85", available: true },
+    { id: "spa-1", name: "Balinese Massage", duration: "60 min", price: "€80", available: true, location: "SPA Suite 1", therapist: "Elena R." },
+    { id: "spa-2", name: "Hot Stone Therapy", duration: "75 min", price: "€95", available: true, location: "SPA Suite 2", therapist: "Marco V." },
+    { id: "spa-3", name: "Aromatherapy Facial", duration: "45 min", price: "€65", available: false, location: "SPA Suite 3", therapist: "Anna K." },
+    { id: "spa-4", name: "Couple's Retreat", duration: "90 min", price: "€160", available: true, location: "Private SPA Suite", therapist: "Elena R. & Marco V." },
+    { id: "spa-5", name: "Deep Tissue Massage", duration: "60 min", price: "€85", available: true, location: "SPA Suite 1", therapist: "Marco V." },
 ];
 
 // ─── Fitness ─────────────────────────────────────────
 export const MOCK_FITNESS: FitnessClass[] = [
-    { id: "fit-1", name: "Morning HIIT", time: "07:00", duration: "45 min", instructor: "Coach Alex", location: "Gym Studio" },
-    { id: "fit-2", name: "Pilates", time: "09:00", duration: "50 min", instructor: "Lisa M.", location: "Gym Studio" },
-    { id: "fit-3", name: "Spin Class", time: "10:30", duration: "40 min", instructor: "Coach Alex", location: "Gym Studio" },
-    { id: "fit-4", name: "Stretch & Relax", time: "17:00", duration: "30 min", instructor: "Lisa M.", location: "Wellness Garden" },
+    { id: "fit-1", name: "Morning HIIT", time: "07:00", duration: "45 min", instructor: "Coach Alex", location: "Gym Studio", description: "High-intensity interval training to kickstart your day." },
+    { id: "fit-2", name: "Pilates", time: "09:00", duration: "50 min", instructor: "Lisa M.", location: "Gym Studio", description: "Core-strengthening exercises with controlled movements." },
+    { id: "fit-3", name: "Spin Class", time: "10:30", duration: "40 min", instructor: "Coach Alex", location: "Gym Studio", description: "High-energy indoor cycling with music." },
+    { id: "fit-4", name: "Stretch & Relax", time: "17:00", duration: "30 min", instructor: "Lisa M.", location: "Wellness Garden", description: "Gentle stretching to unwind after an active day." },
 ];
 
 // ─── Kids Club ───────────────────────────────────────
