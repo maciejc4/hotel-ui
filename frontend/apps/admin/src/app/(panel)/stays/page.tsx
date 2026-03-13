@@ -7,6 +7,14 @@ import { useToast } from "@hotel-ui/shared/components/ui/toast";
 import { Modal } from "@hotel-ui/shared/components/ui/modal";
 import { Plus, Trash2 } from "lucide-react";
 
+const DEFAULT_STAY_DURATION_DAYS = 7;
+
+function getIsoDateOffset(offsetDays = 0) {
+    const date = new Date();
+    date.setDate(date.getDate() + offsetDays);
+    return date.toISOString().split("T")[0];
+}
+
 export default function AdminStaysPage() {
     const { stays, rooms, addStay, deleteStay } = useHotel();
     const { showToast } = useToast();
@@ -16,8 +24,17 @@ export default function AdminStaysPage() {
     const [newRoom, setNewRoom] = React.useState("");
     const [newName, setNewName] = React.useState("");
     const [newDob, setNewDob] = React.useState("");
-    const [newStart, setNewStart] = React.useState(new Date().toISOString().split("T")[0]);
-    const [newEnd, setNewEnd] = React.useState(new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0]);
+    const [newStart, setNewStart] = React.useState("");
+    const [newEnd, setNewEnd] = React.useState("");
+
+    const openAddModal = () => {
+        setNewRoom("");
+        setNewName("");
+        setNewDob("");
+        setNewStart(getIsoDateOffset());
+        setNewEnd(getIsoDateOffset(DEFAULT_STAY_DURATION_DAYS));
+        setShowAdd(true);
+    };
 
     const handleAdd = () => {
         if (!newRoom || !newName.trim() || !newDob) return;
@@ -36,7 +53,7 @@ export default function AdminStaysPage() {
         <div>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">{t("stayManagement")}</h1>
-                <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
+                <button onClick={openAddModal} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
                     <Plus className="w-4 h-4" /> {t("addStay")}
                 </button>
             </div>
