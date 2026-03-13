@@ -2,24 +2,24 @@
 
 ## Build, lint, and dev commands
 
-This is an npm workspaces monorepo with two Next.js apps and a shared package.
+This repository keeps the frontend monorepo under `frontend/`, with two Next.js apps and a shared package.
 
-- Install all dependencies: `npm install --legacy-peer-deps`
-- Dev server (guest, port 3000): `npm run dev:guest`
-- Dev server (admin, port 3001): `npm run dev:admin`
-- Build both apps: `npm run build`
-- Build one app: `npm run build:guest` or `npm run build:admin`
-- Lint both apps: `npm run lint`
-- Lint one file: `npx eslint apps/guest/src/path/to/file.tsx`
+- Install all dependencies: `cd frontend && npm install --legacy-peer-deps`
+- Dev server (guest, port 3000): `cd frontend && npm run dev:guest`
+- Dev server (admin, port 3001): `cd frontend && npm run dev:admin`
+- Build both apps: `cd frontend && npm run build`
+- Build one app: `cd frontend && npm run build:guest` or `cd frontend && npm run build:admin`
+- Lint both apps: `cd frontend && npm run lint`
+- Lint one file: `cd frontend && npx eslint apps/guest/src/path/to/file.tsx`
 - There is no test runner configured in this repository.
 
 ## High-level architecture
 
 ### Monorepo layout
 
-- `apps/guest/` — Guest-facing PWA (Next.js, static export, basePath `/hotel-ui`)
-- `apps/admin/` — Staff management panel (Next.js, static export, basePath `/hotel-ui/admin`)
-- `packages/shared/` — Shared types, services, UI components, contexts, hooks, and i18n used by both apps
+- `frontend/apps/guest/` — Guest-facing PWA (Next.js, static export, basePath `/hotel-ui`)
+- `frontend/apps/admin/` — Staff management panel (Next.js, static export, basePath `/hotel-ui/admin`)
+- `frontend/packages/shared/` — Shared types, services, UI components, contexts, hooks, and i18n used by both apps
 
 Both apps use `transpilePackages: ["@hotel-ui/shared"]` so the shared package ships raw TypeScript — no separate build step needed.
 
@@ -36,7 +36,7 @@ Import shared code via subpath, e.g. `import { Button } from "@hotel-ui/shared/c
 - `hooks/useGuestSession.ts` — Reads guest session from localStorage
 - `i18n/` — `I18nProvider` (next-intl) + message files for en, pl, de
 
-### Guest app (`apps/guest/`)
+### Guest app (`frontend/apps/guest/`)
 
 - Root page (`/`) is the guest onboarding/login (QR-code entry, DOB verification).
 - `/guest/**` routes are wrapped by a layout with localStorage session guard and mobile bottom navigation.
@@ -44,7 +44,7 @@ Import shared code via subpath, e.g. `import { Button } from "@hotel-ui/shared/c
 - Dynamic ticket route uses a server/client split: `tickets/[id]/page.tsx` generates static params; `client.tsx` renders the interactive UI.
 - Configured as a PWA with `manifest.json`, service worker (`public/sw.js`), and apple-web-app meta tags.
 
-### Admin app (`apps/admin/`)
+### Admin app (`frontend/apps/admin/`)
 
 - Root page (`/`) is the admin login.
 - `/(panel)/**` routes are wrapped by a layout with localStorage session guard and sidebar navigation.
@@ -64,4 +64,4 @@ Both apps are statically exported and deployed to GitHub Pages under `/hotel-ui/
 - Admin styling uses standard Tailwind utility classes directly — no custom CSS layer.
 - Reuse `getTicketStatusVariant()` / `getTicketStatusColor()` from `@hotel-ui/shared/lib/statusColor` instead of re-encoding ticket status mappings.
 - Mock data lives in each app's `public/data/*.json`. Update these files when changing seed content.
-- When adding a new shared component or type, add it to `packages/shared/` and register its export in the shared package's `package.json` exports field.
+- When adding a new shared component or type, add it to `frontend/packages/shared/` and register its export in the shared package's `package.json` exports field.
