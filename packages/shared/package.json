@@ -1,0 +1,29 @@
+{
+  "name": "@hotel-ui/shared",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./types": "./types/index.ts",
+    "./services/api": "./services/api.ts",
+    "./lib/utils": "./lib/utils.ts",
+    "./lib/statusColor": "./lib/statusColor.ts",
+    "./components/ui/button": "./components/ui/button.tsx",
+    "./components/ui/badge": "./components/ui/badge.tsx",
+    "./components/ui/card": "./components/ui/card.tsx",
+    "./components/ui/modal": "./components/ui/modal.tsx",
+    "./components/ui/toast": "./components/ui/toast.tsx",
+    "./contexts/HotelContext": "./contexts/HotelContext.tsx",
+    "./hooks/useGuestSession": "./hooks/useGuestSession.ts",
+    "./i18n/I18nProvider": "./i18n/I18nProvider.tsx"
+  },
+  "peerDependencies": {
+    "clsx": "^2",
+    "framer-motion": "^12",
+    "lucide-react": ">=0.400",
+    "next": ">=15",
+    "next-intl": "^4",
+    "react": "^19",
+    "react-dom": "^19",
+    "tailwind-merge": "^3"
+  }
+}

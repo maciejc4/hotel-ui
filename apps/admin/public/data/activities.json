@@ -1,0 +1,56 @@
+[
+    {
+        "id": "act-1", "title": "Beach Volleyball", "type": "sport", "emoji": "🏐",
+        "status": "open", "busyLevel": "medium", "openTime": "08:00", "closeTime": "18:00",
+        "description": "Join our daily beach volleyball tournaments! All skill levels welcome.",
+        "schedule": [
+            { "time": "09:00", "name": "Morning Warm-up", "location": "Main Beach" },
+            { "time": "11:00", "name": "Open Tournament", "location": "Main Beach" },
+            { "time": "16:00", "name": "Sunset Match", "location": "Main Beach" }
+        ]
+    },
+    {
+        "id": "act-2", "title": "Aqua Aerobics", "type": "sport", "emoji": "🏊",
+        "status": "open", "busyLevel": "low", "openTime": "08:00", "closeTime": "12:00",
+        "description": "Fun water exercises in the main pool with our certified instructors.",
+        "schedule": [
+            { "time": "09:00", "name": "Morning Aqua Fit", "location": "Main Pool" },
+            { "time": "10:30", "name": "Aqua Zumba", "location": "Main Pool" }
+        ]
+    },
+    {
+        "id": "act-3", "title": "Live Music Nights", "type": "entertainment", "emoji": "🎵",
+        "status": "open", "busyLevel": "high", "openTime": "20:00", "closeTime": "23:00",
+        "description": "Enjoy live performances every evening at the amphitheatre.",
+        "schedule": [
+            { "time": "20:00", "name": "Acoustic Guitar Set", "location": "Amphitheatre" },
+            { "time": "21:30", "name": "Latin Dance Show", "location": "Amphitheatre" }
+        ]
+    },
+    {
+        "id": "act-4", "title": "Yoga & Meditation", "type": "sport", "emoji": "🧘",
+        "status": "open", "busyLevel": "low", "openTime": "06:00", "closeTime": "10:00",
+        "description": "Start your day with sunrise yoga on the rooftop terrace.",
+        "schedule": [
+            { "time": "06:30", "name": "Sunrise Yoga", "location": "Rooftop Terrace" },
+            { "time": "08:00", "name": "Hatha Yoga", "location": "Wellness Garden" },
+            { "time": "09:30", "name": "Guided Meditation", "location": "Wellness Garden" }
+        ]
+    },
+    {
+        "id": "act-5", "title": "Treasure Hunt", "type": "kids", "emoji": "🗺️",
+        "status": "open", "busyLevel": "medium", "openTime": "10:00", "closeTime": "12:00",
+        "description": "An exciting adventure around the resort for kids and families!",
+        "schedule": [
+            { "time": "10:00", "name": "Treasure Hunt Start", "location": "Kids Club" }
+        ]
+    },
+    {
+        "id": "act-6", "title": "Cooking Class", "type": "entertainment", "emoji": "👨‍🍳",
+        "status": "open", "busyLevel": "low", "openTime": "15:00", "closeTime": "17:00",
+        "description": "Learn to cook local dishes with our head chef.",
+        "schedule": [
+            { "time": "15:00", "name": "Mediterranean Cooking", "location": "Demo Kitchen" }
+        ]
+    }
+]

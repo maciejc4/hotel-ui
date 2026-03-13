@@ -1,0 +1,6 @@
+[
+    { "id": "car-1", "model": "Fiat 500", "type": "Economy", "pricePerDay": "€35", "available": true },
+    { "id": "car-2", "model": "VW Golf", "type": "Compact", "pricePerDay": "€50", "available": true },
+    { "id": "car-3", "model": "Jeep Wrangler", "type": "SUV", "pricePerDay": "€85", "available": false },
+    { "id": "car-4", "model": "Mercedes E-Class", "type": "Premium", "pricePerDay": "€120", "available": true }
+]

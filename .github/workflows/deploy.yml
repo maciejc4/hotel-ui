@@ -26,11 +26,23 @@ jobs:
           cache: npm
 
       - run: npm install --legacy-peer-deps
-      - run: npm run build
+
+      - name: Build guest app
+        run: npm run build:guest
+
+      - name: Build admin app
+        run: npm run build:admin
+
+      - name: Merge outputs
+        run: |
+          mkdir -p deploy
+          cp -r apps/guest/out/* deploy/
+          mkdir -p deploy/admin
+          cp -r apps/admin/out/* deploy/admin/
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ./deploy
 
   deploy:
     environment:

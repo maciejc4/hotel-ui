@@ -1,0 +1,17 @@
+[
+    {
+        "id": "conv-1", "roomId": "room-204", "guestName": "Thomas Mueller", "unread": 1,
+        "messages": [
+            { "id": "msg-c1-1", "sender": "guest", "text": "Hello! Could we get extra towels?", "timestamp": "2026-03-12T10:00:00Z" },
+            { "id": "msg-c1-2", "sender": "staff", "text": "Of course! We'll bring them to room 204 right away.", "timestamp": "2026-03-12T10:02:00Z" },
+            { "id": "msg-c1-3", "sender": "guest", "text": "Also, is there a microwave we can use for baby food?", "timestamp": "2026-03-12T11:15:00Z" }
+        ]
+    },
+    {
+        "id": "conv-2", "roomId": "room-305", "guestName": "Anna Nowak", "unread": 0,
+        "messages": [
+            { "id": "msg-c2-1", "sender": "guest", "text": "What time does the pool close?", "timestamp": "2026-03-12T09:00:00Z" },
+            { "id": "msg-c2-2", "sender": "staff", "text": "The main pool is open until 20:00. Enjoy!", "timestamp": "2026-03-12T09:05:00Z" }
+        ]
+    }
+]
