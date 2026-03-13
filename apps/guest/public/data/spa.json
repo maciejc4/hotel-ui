@@ -1,0 +1,7 @@
+[
+    { "id": "spa-1", "name": "Balinese Massage", "duration": "60 min", "price": "€80", "available": true, "location": "SPA Suite 1", "therapist": "Elena R." },
+    { "id": "spa-2", "name": "Hot Stone Therapy", "duration": "75 min", "price": "€95", "available": true, "location": "SPA Suite 2", "therapist": "Marco V." },
+    { "id": "spa-3", "name": "Aromatherapy Facial", "duration": "45 min", "price": "€65", "available": false, "location": "SPA Suite 3", "therapist": "Anna K." },
+    { "id": "spa-4", "name": "Couple's Retreat", "duration": "90 min", "price": "€160", "available": true, "location": "Private SPA Suite", "therapist": "Elena R. & Marco V." },
+    { "id": "spa-5", "name": "Deep Tissue Massage", "duration": "60 min", "price": "€85", "available": true, "location": "SPA Suite 1", "therapist": "Marco V." }
+]

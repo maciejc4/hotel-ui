@@ -1,0 +1,5 @@
+[
+    { "id": "alc-1", "name": "Sakura Japanese Kitchen", "cuisine": "Japanese", "dressCode": "Smart Casual", "reservationRequired": true, "description": "Authentic sushi and teppanyaki experience." },
+    { "id": "alc-2", "name": "Il Giardino", "cuisine": "Italian", "dressCode": "Smart Casual", "reservationRequired": true, "description": "Handmade pasta and wood-fired pizza." },
+    { "id": "alc-3", "name": "Mar y Fuego", "cuisine": "Grill & Seafood", "dressCode": "Elegant", "reservationRequired": true, "description": "Premium grilled meats and fresh seafood." }
+]

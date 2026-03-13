@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-jakarta);
+}
+
+body {
+  background: #f8fafc;
+  color: #1e293b;
+  @apply antialiased;
+}

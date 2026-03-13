@@ -1,0 +1,15 @@
+{
+    "openTime": "09:00",
+    "closeTime": "17:00",
+    "ageRange": "4–12 years",
+    "dropOffPolicy": "Parents may leave children for supervised sessions (max 3 hours). ID bracelet required.",
+    "description": "Fun-filled activities for kids including arts, games, and outdoor adventures. Supervised by certified professionals.",
+    "minidiscoTime": "19:00",
+    "schedule": [
+        { "time": "09:30", "name": "Arts & Crafts", "location": "Kids Club Room" },
+        { "time": "11:00", "name": "Pool Games", "location": "Kids Pool" },
+        { "time": "14:00", "name": "Face Painting", "location": "Kids Club Room" },
+        { "time": "15:30", "name": "Treasure Hunt", "location": "Garden" },
+        { "time": "19:00", "name": "🪩 Minidisco", "location": "Main Stage" }
+    ]
+}

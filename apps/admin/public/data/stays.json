@@ -1,0 +1,5 @@
+[
+    { "id": "stay-1", "roomId": "room-204", "guestName": "Thomas Mueller", "guestDob": "1990-05-15", "startDate": "2026-03-10", "endDate": "2026-03-17" },
+    { "id": "stay-2", "roomId": "room-305", "guestName": "Anna Nowak", "guestDob": "1985-11-22", "startDate": "2026-03-11", "endDate": "2026-03-18" },
+    { "id": "stay-3", "roomId": "room-101", "guestName": "John Smith", "guestDob": "2000-01-01", "startDate": "2026-03-12", "endDate": "2026-03-15" }
+]

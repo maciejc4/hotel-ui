@@ -1,0 +1,6 @@
+[
+    { "id": "fit-1", "name": "Morning HIIT", "time": "07:00", "duration": "45 min", "instructor": "Coach Alex", "location": "Gym Studio", "description": "High-intensity interval training to kickstart your day." },
+    { "id": "fit-2", "name": "Pilates", "time": "09:00", "duration": "50 min", "instructor": "Lisa M.", "location": "Gym Studio", "description": "Core-strengthening exercises with controlled movements." },
+    { "id": "fit-3", "name": "Spin Class", "time": "10:30", "duration": "40 min", "instructor": "Coach Alex", "location": "Gym Studio", "description": "High-energy indoor cycling with music." },
+    { "id": "fit-4", "name": "Stretch & Relax", "time": "17:00", "duration": "30 min", "instructor": "Lisa M.", "location": "Wellness Garden", "description": "Gentle stretching to unwind after an active day." }
+]
