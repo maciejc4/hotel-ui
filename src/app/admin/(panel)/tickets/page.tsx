@@ -1,14 +1,18 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useHotel } from "@/contexts/HotelContext";
 import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
 import { Send, Bot, User } from "lucide-react";
+import { getTicketStatusColor } from "@/lib/statusColor";
 
 export default function AdminTicketsPage() {
     const { tickets, staff, updateTicketStatus, assignTicket, addTicketMessage } = useHotel();
     const { showToast } = useToast();
+    const t = useTranslations("admin");
+    const tCommon = useTranslations("common");
     const [selectedTicket, setSelectedTicket] = React.useState<string | null>(null);
     const [input, setInput] = React.useState("");
     const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -27,60 +31,54 @@ export default function AdminTicketsPage() {
         setInput("");
     };
 
-    const statusColors: Record<string, string> = {
-        New: "bg-red-100 text-red-700",
-        "In Progress": "bg-yellow-100 text-yellow-700",
-        Closed: "bg-green-100 text-green-700",
-    };
-
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Ticket Management</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">{t("ticketManagement")}</h1>
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">ID</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Issue</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Category</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Assigned</th>
-                            <th className="text-right px-4 py-3 font-semibold text-gray-600">Chat</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{t("id")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{t("issue")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{tCommon("category")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{tCommon("status")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{t("assigned")}</th>
+                            <th className="text-right px-4 py-3 font-semibold text-gray-600">{t("chatLabel")}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {tickets.map(t => (
-                            <tr key={t.id} className="border-b border-gray-100 hover:bg-gray-50" onClick={() => setSelectedTicket(t.id)}>
-                                <td className="px-4 py-3 font-mono font-bold text-gray-500 text-xs">{t.id}</td>
-                                <td className="px-4 py-3 font-semibold text-gray-900 truncate max-w-[200px]">{t.issue}</td>
-                                <td className="px-4 py-3"><span className="px-2 py-0.5 bg-gray-100 rounded-full text-xs">{t.category}</span></td>
+                        {tickets.map(tkt => (
+                            <tr key={tkt.id} className="border-b border-gray-100 hover:bg-gray-50" onClick={() => setSelectedTicket(tkt.id)}>
+                                <td className="px-4 py-3 font-mono font-bold text-gray-500 text-xs">{tkt.id}</td>
+                                <td className="px-4 py-3 font-semibold text-gray-900 truncate max-w-[200px]">{tkt.issue}</td>
+                                <td className="px-4 py-3"><span className="px-2 py-0.5 bg-gray-100 rounded-full text-xs">{tkt.category}</span></td>
                                 <td className="px-4 py-3">
                                     <select
-                                        value={t.status}
-                                        onChange={(e) => { e.stopPropagation(); updateTicketStatus(t.id, e.target.value as "New" | "In Progress" | "Closed"); showToast(`Status updated to ${e.target.value}`); }}
+                                        value={tkt.status}
+                                        onChange={(e) => { e.stopPropagation(); updateTicketStatus(tkt.id, e.target.value as "New" | "In Progress" | "Closed"); showToast(t("statusUpdated", { status: e.target.value })); }}
                                         onClick={(e) => e.stopPropagation()}
-                                        className={`px-2 py-1 rounded-full text-xs font-bold border-0 cursor-pointer ${statusColors[t.status]}`}
+                                        className={`px-2 py-1 rounded-full text-xs font-bold border-0 cursor-pointer ${getTicketStatusColor(tkt.status)}`}
                                     >
-                                        <option value="New">New</option>
-                                        <option value="In Progress">In Progress</option>
-                                        <option value="Closed">Closed</option>
+                                        <option value="New">{t("new")}</option>
+                                        <option value="In Progress">{t("inProgress")}</option>
+                                        <option value="Closed">{t("closed")}</option>
                                     </select>
                                 </td>
                                 <td className="px-4 py-3">
                                     <select
-                                        value={t.assignedTo || ""}
-                                        onChange={(e) => { e.stopPropagation(); assignTicket(t.id, e.target.value); showToast("Ticket assigned!"); }}
+                                        value={tkt.assignedTo || ""}
+                                        onChange={(e) => { e.stopPropagation(); assignTicket(tkt.id, e.target.value); showToast(t("ticketAssigned")); }}
                                         onClick={(e) => e.stopPropagation()}
                                         className="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600"
                                     >
-                                        <option value="">Unassigned</option>
+                                        <option value="">{t("unassigned")}</option>
                                         {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
                                 </td>
                                 <td className="px-4 py-3 text-right">
-                                    <button className="text-blue-600 hover:text-blue-800 text-xs font-semibold" onClick={() => setSelectedTicket(t.id)}>
-                                        Open ({t.messages.length})
+                                    <button className="text-blue-600 hover:text-blue-800 text-xs font-semibold" onClick={() => setSelectedTicket(tkt.id)}>
+                                        Open ({tkt.messages.length})
                                     </button>
                                 </td>
                             </tr>
@@ -94,9 +92,9 @@ export default function AdminTicketsPage() {
                 {ticket && (
                     <div className="flex flex-col h-[500px]">
                         <div className="px-6 py-3 bg-gray-50 border-b flex items-center gap-4 text-sm">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusColors[ticket.status]}`}>{ticket.status}</span>
-                            <span className="text-gray-500">Cat: {ticket.category}</span>
-                            <span className="text-gray-500">Room: {ticket.roomId.replace("room-", "")}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${getTicketStatusColor(ticket.status)}`}>{ticket.status}</span>
+                            <span className="text-gray-500">{tCommon("category")}: {ticket.category}</span>
+                            <span className="text-gray-500">{tCommon("room")}: {ticket.roomId.replace("room-", "")}</span>
                         </div>
                         <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
                             {ticket.messages.map(msg => (
@@ -112,7 +110,7 @@ export default function AdminTicketsPage() {
                             ))}
                         </div>
                         <div className="p-4 border-t flex gap-2">
-                            <input type="text" placeholder="Reply to guest..." value={input} onChange={(e) => setInput(e.target.value)}
+                            <input type="text" placeholder={t("replyToGuest")} value={input} onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
                                 className="flex-1 border border-gray-300 rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" />
                             <button onClick={handleSend} disabled={!input.trim()} className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-700 disabled:opacity-50">

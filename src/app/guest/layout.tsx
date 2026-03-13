@@ -2,23 +2,26 @@
 
 import * as React from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Home, Info, MessageCircle, AlertTriangle } from "lucide-react";
+import { Home, Info, MessageCircle, AlertTriangle, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { useHotel } from "@/contexts/HotelContext";
 import { cn } from "@/lib/utils";
-
-const tabs = [
-    { href: "/guest", icon: Home, label: "Home" },
-    { href: "/guest/info", icon: Info, label: "Info" },
-    { href: "/guest/messages", icon: MessageCircle, label: "Chat" },
-    { href: "/guest/tickets", icon: AlertTriangle, label: "Tickets" },
-];
+import { LanguageSwitcher } from "@/components/features/LanguageSwitcher";
 
 export default function GuestLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const { branding } = useHotel();
+    const t = useTranslations("guest");
     const [session, setSession] = React.useState<{ roomNumber: string; guestName: string } | null>(null);
+
+    const tabs = React.useMemo(() => [
+        { href: "/guest", icon: Home, label: t("home") },
+        { href: "/guest/info", icon: Info, label: t("info") },
+        { href: "/guest/messages", icon: MessageCircle, label: t("chat") },
+        { href: "/guest/tickets", icon: AlertTriangle, label: t("tickets") },
+    ], [t]);
 
     React.useEffect(() => {
         const data = localStorage.getItem("guestSession");
@@ -27,6 +30,13 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
         } else {
             setSession(JSON.parse(data));
         }
+    }, [router]);
+
+    const handleLogout = React.useCallback(() => {
+        localStorage.removeItem("guestSession");
+        localStorage.removeItem("kidsMode");
+        document.body.classList.remove("kids-mode");
+        router.push("/");
     }, [router]);
 
     if (!session) return null;
@@ -43,8 +53,19 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
                     </div>
                     <div>
                         <h2 className="text-sm font-bold text-[var(--color-text-main)] leading-tight truncate max-w-[180px]">{branding.name}</h2>
-                        <p className="text-[11px] text-[var(--color-text-muted)] font-medium">Room {session.roomNumber} • {session.guestName}</p>
+                        <p className="text-[11px] text-[var(--color-text-muted)] font-medium">{t("home") === "Home" ? "Room" : "Pokój"} {session.roomNumber} • {session.guestName}</p>
                     </div>
+                </div>
+                <div className="flex items-center gap-1">
+                    <LanguageSwitcher variant="compact" />
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-500 transition-colors"
+                        aria-label={t("logout")}
+                        title={t("logout")}
+                    >
+                        <LogOut className="w-3.5 h-3.5" />
+                    </button>
                 </div>
             </header>
 

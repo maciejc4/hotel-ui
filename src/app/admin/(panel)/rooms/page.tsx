@@ -1,15 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useHotel } from "@/contexts/HotelContext";
 import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
 import { Plus, Trash2, Search, QrCode, Printer } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 export default function AdminRoomsPage() {
     const { rooms, addRoom, deleteRoom } = useHotel();
     const { showToast } = useToast();
+    const t = useTranslations("admin");
+    const tCommon = useTranslations("common");
     const [search, setSearch] = React.useState("");
     const [showAdd, setShowAdd] = React.useState(false);
     const [showDetail, setShowDetail] = React.useState<string | null>(null);
@@ -28,21 +30,21 @@ export default function AdminRoomsPage() {
         setNewNum("");
         setNewFloor("1");
         setNewEquip([]);
-        showToast(`Room ${newNum} added!`);
+        showToast(t("roomAdded", { number: newNum }));
     };
 
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Room Management</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t("roomManagement")}</h1>
                 <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
-                    <Plus className="w-4 h-4" /> Add Room
+                    <Plus className="w-4 h-4" /> {t("addRoom")}
                 </button>
             </div>
 
             <div className="mb-4 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input type="text" placeholder="Search rooms..." value={search} onChange={(e) => setSearch(e.target.value)}
+                <input type="text" placeholder={t("searchRooms")} value={search} onChange={(e) => setSearch(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" />
             </div>
 
@@ -50,10 +52,10 @@ export default function AdminRoomsPage() {
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Room</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Floor</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Equipment</th>
-                            <th className="text-right px-4 py-3 font-semibold text-gray-600">Actions</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{tCommon("room")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{tCommon("floor")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{tCommon("equipment")}</th>
+                            <th className="text-right px-4 py-3 font-semibold text-gray-600">{tCommon("actions")}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,7 +71,7 @@ export default function AdminRoomsPage() {
                                     </div>
                                 </td>
                                 <td className="px-4 py-3 text-right">
-                                    <button onClick={(e) => { e.stopPropagation(); deleteRoom(room.id); showToast(`Room ${room.number} deleted.`); }}
+                                    <button onClick={(e) => { e.stopPropagation(); deleteRoom(room.id); showToast(t("roomDeleted", { number: room.number })); }}
                                         className="text-gray-400 hover:text-red-500 transition-colors p-1">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -81,20 +83,20 @@ export default function AdminRoomsPage() {
             </div>
 
             {/* Add Room Modal */}
-            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Room" size="sm">
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title={t("addNewRoom")} size="sm">
                 <div className="p-6 space-y-4">
                     <div>
-                        <label className="text-xs font-semibold text-gray-500 block mb-1">Room Number</label>
+                        <label className="text-xs font-semibold text-gray-500 block mb-1">{t("roomNumber")}</label>
                         <input type="text" value={newNum} onChange={(e) => setNewNum(e.target.value)}
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" />
                     </div>
                     <div>
-                        <label className="text-xs font-semibold text-gray-500 block mb-1">Floor</label>
+                        <label className="text-xs font-semibold text-gray-500 block mb-1">{tCommon("floor")}</label>
                         <input type="number" value={newFloor} onChange={(e) => setNewFloor(e.target.value)}
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" />
                     </div>
                     <div>
-                        <label className="text-xs font-semibold text-gray-500 block mb-2">Equipment</label>
+                        <label className="text-xs font-semibold text-gray-500 block mb-2">{tCommon("equipment")}</label>
                         <div className="flex flex-wrap gap-2">
                             {allEquipment.map(eq => (
                                 <button key={eq} onClick={() => setNewEquip(prev => prev.includes(eq) ? prev.filter(e => e !== eq) : [...prev, eq])}
@@ -105,21 +107,21 @@ export default function AdminRoomsPage() {
                         </div>
                     </div>
                     <button onClick={handleAdd} className="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-blue-700" disabled={!newNum.trim()}>
-                        Add Room
+                        {t("addRoom")}
                     </button>
                 </div>
             </Modal>
 
             {/* Room Detail Modal */}
-            <Modal isOpen={!!showDetail} onClose={() => setShowDetail(null)} title={`Room ${detailRoom?.number}`} size="md">
+            <Modal isOpen={!!showDetail} onClose={() => setShowDetail(null)} title={`${tCommon("room")} ${detailRoom?.number}`} size="md">
                 {detailRoom && (
                     <div className="p-6 space-y-5">
                         <div className="grid grid-cols-2 gap-4">
-                            <div><span className="text-xs text-gray-500 font-semibold">Room Number</span><p className="text-lg font-bold text-gray-900">{detailRoom.number}</p></div>
-                            <div><span className="text-xs text-gray-500 font-semibold">Floor</span><p className="text-lg font-bold text-gray-900">{detailRoom.floor}</p></div>
+                            <div><span className="text-xs text-gray-500 font-semibold">{t("roomNumber")}</span><p className="text-lg font-bold text-gray-900">{detailRoom.number}</p></div>
+                            <div><span className="text-xs text-gray-500 font-semibold">{tCommon("floor")}</span><p className="text-lg font-bold text-gray-900">{detailRoom.floor}</p></div>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500 font-semibold block mb-2">Equipment</span>
+                            <span className="text-xs text-gray-500 font-semibold block mb-2">{tCommon("equipment")}</span>
                             <div className="flex flex-wrap gap-2">
                                 {detailRoom.equipment.map(eq => (
                                     <span key={eq} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">{eq}</span>
@@ -127,15 +129,15 @@ export default function AdminRoomsPage() {
                             </div>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-500 font-semibold block mb-2">QR Code for Guest Access</span>
+                            <span className="text-xs text-gray-500 font-semibold block mb-2">{t("qrCodeAccess")}</span>
                             <div className="w-48 h-48 mx-auto bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
                                 <QrCode className="w-24 h-24 text-gray-400" />
                             </div>
-                            <p className="text-xs text-gray-400 text-center mt-2">Scan to access guest app for Room {detailRoom.number}</p>
+                            <p className="text-xs text-gray-400 text-center mt-2">{t("scanToAccess", { number: detailRoom.number })}</p>
                         </div>
-                        <button onClick={() => { showToast("Room card sent to printer!"); }}
+                        <button onClick={() => { showToast(t("roomCardSent")); }}
                             className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Printer className="w-4 h-4" /> Print Room Card with QR
+                            <Printer className="w-4 h-4" /> {t("printRoomCard")}
                         </button>
                     </div>
                 )}

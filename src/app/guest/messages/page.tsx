@@ -2,111 +2,107 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Send, Bot, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Send, Bot, User, ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useHotel } from "@/contexts/HotelContext";
-
-const STAFF_REPLIES = [
-    "Of course! We'll take care of that right away.",
-    "Thank you for reaching out. Let me check on that for you.",
-    "Absolutely! Is there anything else you need?",
-    "We'll send someone to your room shortly.",
-    "Great question! Let me get back to you with the details.",
-];
+import { useGuestSession } from "@/hooks/useGuestSession";
 
 export default function GuestMessagesPage() {
-    const { conversations, addConversationMessage, getOrCreateConversation } = useHotel();
+    const { getOrCreateConversation, addConversationMessage } = useHotel();
+    const session = useGuestSession();
+    const t = useTranslations("messages");
     const [input, setInput] = React.useState("");
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
-    const session = React.useMemo(() => {
-        if (typeof window === "undefined") return null;
-        const data = localStorage.getItem("guestSession");
-        return data ? JSON.parse(data) : null;
-    }, []);
-
-    const conversation = React.useMemo(() => {
+    const conv = React.useMemo(() => {
         if (!session) return null;
-        return conversations.find(c => c.roomId === session.roomId) || null;
-    }, [session, conversations]);
+        return getOrCreateConversation(session.roomId, session.guestName);
+    }, [session, getOrCreateConversation]);
 
-    const convId = conversation?.id;
+    // Get latest conversation state
+    const { conversations } = useHotel();
+    const currentConv = conversations.find(c => c.id === conv?.id) || conv;
 
     React.useEffect(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-    }, [conversation?.messages.length]);
+    }, [currentConv?.messages.length]);
 
     const handleSend = () => {
-        if (!input.trim() || !session) return;
-
-        const conv = conversation || getOrCreateConversation(session.roomId, session.guestName);
-        const msgId = `msg-${Date.now()}`;
-        addConversationMessage(conv.id, {
-            id: msgId, sender: "guest", text: input, timestamp: new Date().toISOString(),
+        if (!input.trim() || !currentConv) return;
+        addConversationMessage(currentConv.id, {
+            id: `msg-${Date.now()}`, sender: "guest", text: input, timestamp: new Date().toISOString(),
         });
         setInput("");
 
-        // Mock staff reply
+        // Simulate staff reply
         setTimeout(() => {
-            addConversationMessage(conv.id, {
-                id: `msg-${Date.now()}`,
-                sender: "staff",
-                text: STAFF_REPLIES[Math.floor(Math.random() * STAFF_REPLIES.length)],
+            addConversationMessage(currentConv.id, {
+                id: `msg-${Date.now() + 1}`, sender: "staff",
+                text: "Thank you for your message! Our team will get back to you shortly.",
                 timestamp: new Date().toISOString(),
             });
         }, 2000);
     };
 
+    if (!currentConv) return null;
+
     return (
-        <div className="flex flex-col h-[calc(100vh-12rem)] max-w-2xl mx-auto">
+        <div className="flex flex-col h-[calc(100vh-8rem)]">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-gray-200/60">
-                <h1 className="text-lg font-bold text-[var(--color-text-main)]">Chat with Reception</h1>
-                <p className="text-xs text-[var(--color-text-muted)]">We typically reply within a few minutes</p>
+            <div className="px-4 py-3 glass-panel">
+                <h2 className="text-lg font-bold text-[var(--color-text-main)]">{t("chatWithReception")}</h2>
+                <p className="text-xs text-[var(--color-text-muted)]">{t("replyTime")}</p>
             </div>
 
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-                {(conversation?.messages || []).map((msg, idx) => (
+                {currentConv.messages.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                            <Bot className="w-8 h-8 text-primary" />
+                        </div>
+                        <p className="text-sm text-[var(--color-text-muted)]">{t("sendMessage")}</p>
+                    </div>
+                )}
+                {currentConv.messages.map(msg => (
                     <motion.div
                         key={msg.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex gap-2 ${msg.sender === "guest" ? "flex-row-reverse" : "flex-row"}`}
                     >
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${msg.sender === "guest" ? "bg-accent" : "bg-primary"
-                            }`}>
-                            {msg.sender === "guest" ? <User size={12} className="text-white" /> : <Bot size={12} className="text-white" />}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.sender === "guest" ? "bg-primary" : "bg-gray-400"}`}>
+                            {msg.sender === "guest" ? <User size={14} className="text-white" /> : <Bot size={14} className="text-white" />}
                         </div>
-                        <div className={`px-4 py-2.5 rounded-2xl max-w-[75%] text-sm ${msg.sender === "guest"
+                        <div className={`px-4 py-3 rounded-2xl max-w-[75%] text-sm shadow-sm ${msg.sender === "guest"
                                 ? "bg-primary text-white rounded-tr-sm"
                                 : "glass-panel text-[var(--color-text-main)] rounded-tl-sm"
-                            }`}>
+                            }`}
+                        >
                             {msg.text}
+                            <p className="text-[10px] mt-1 opacity-50">{new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
                         </div>
                     </motion.div>
                 ))}
-                {(!conversation || conversation.messages.length === 0) && (
-                    <div className="text-center text-[var(--color-text-muted)] text-sm py-12">
-                        <Bot className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                        <p>Send a message to the reception</p>
-                    </div>
-                )}
             </div>
 
             {/* Input */}
-            <div className="p-3 glass-panel-heavy border-t border-gray-200/60 flex gap-2">
+            <div className="glass-panel-heavy p-4 flex gap-2">
                 <input
                     type="text"
-                    placeholder="Type your message..."
-                    className="flex-1 bg-white/50 border border-gray-200 rounded-full px-4 py-3 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    placeholder={t("typeMessage")}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    className="flex-1 glass-panel rounded-full px-4 py-3 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/50 bg-transparent"
                 />
-                <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary text-white" onClick={handleSend} disabled={!input.trim()}>
-                    <Send className="w-4 h-4" />
-                </Button>
+                <button
+                    onClick={handleSend}
+                    disabled={!input.trim()}
+                    className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-50 shadow-md glow-primary"
+                >
+                    <Send className="w-5 h-5" />
+                </button>
             </div>
         </div>
     );

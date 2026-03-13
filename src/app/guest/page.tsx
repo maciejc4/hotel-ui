@@ -3,41 +3,43 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { Clock, Key, Map, MessageCircle, AlertTriangle, Utensils, Dumbbell, Baby, Car, Sparkles, Calendar, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useHotel } from "@/contexts/HotelContext";
 import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
-import { MOCK_ACTIVITIES, MOCK_KIDS_CLUB, type Activity } from "@/lib/mockData";
+import { useGuestSession } from "@/hooks/useGuestSession";
 import { KidsModeToggle } from "@/components/features/KidsModeToggle";
-import { AIConcierge } from "@/components/features/AIConcierge";
 import { ResortMap } from "@/components/features/ResortMap";
+import { AIConcierge } from "@/components/features/AIConcierge";
 import { useRouter } from "next/navigation";
-
-// Explore resort items — filtered based on kids mode
-const EXPLORE_ITEMS_ADULT = [
-    { icon: Utensils, label: "Dining", color: "from-orange-400 to-red-400", tab: "dining" },
-    { icon: Calendar, label: "Activities", color: "from-blue-400 to-cyan-400", tab: "activities" },
-    { icon: Dumbbell, label: "Fitness", color: "from-emerald-400 to-teal-400", tab: "fitness" },
-    { icon: Sparkles, label: "SPA", color: "from-purple-400 to-pink-400", tab: "spa" },
-    { icon: Baby, label: "Kids Club", color: "from-yellow-400 to-orange-400", tab: "kids" },
-    { icon: Car, label: "Car Rental", color: "from-gray-400 to-slate-400", tab: "cars" },
-];
-
-const EXPLORE_ITEMS_KIDS = [
-    { icon: Baby, label: "Kids Club", color: "from-yellow-400 to-orange-400", tab: "kids" },
-    { icon: Calendar, label: "Activities", color: "from-blue-400 to-cyan-400", tab: "activities" },
-];
+import type { Activity } from "@/types";
+import { fetchActivities, fetchKidsClub } from "@/services/api";
+import type { KidsClubInfo } from "@/types";
 
 export default function GuestDashboard() {
     const router = useRouter();
     const { tickets, lateCheckoutStatus, requestLateCheckout, stays, addToSchedule, userSchedule } = useHotel();
     const { showToast } = useToast();
+    const t = useTranslations("guest");
+    const tMsg = useTranslations("messages");
+    const tCommon = useTranslations("common");
+    const session = useGuestSession();
+
     const [showCheckoutModal, setShowCheckoutModal] = React.useState(false);
     const [showMapModal, setShowMapModal] = React.useState(false);
     const [selectedTime, setSelectedTime] = React.useState("");
     const [selectedActivity, setSelectedActivity] = React.useState<Activity | null>(null);
     const [isKidsMode, setIsKidsMode] = React.useState(false);
+    const [activities, setActivities] = React.useState<Activity[]>([]);
+    const [kidsClub, setKidsClub] = React.useState<KidsClubInfo | null>(null);
+
+    // Load activities and kids club from service
+    React.useEffect(() => {
+        fetchActivities().then(setActivities).catch(console.error);
+        fetchKidsClub().then(setKidsClub).catch(console.error);
+    }, []);
 
     React.useEffect(() => {
         const checkKidsMode = () => {
@@ -49,12 +51,6 @@ export default function GuestDashboard() {
         return () => observer.disconnect();
     }, []);
 
-    const session = React.useMemo(() => {
-        if (typeof window === "undefined") return null;
-        const data = localStorage.getItem("guestSession");
-        return data ? JSON.parse(data) : null;
-    }, []);
-
     const currentStay = stays.find(s => s.roomId === session?.roomId);
     const myTickets = tickets.filter(t => t.roomId === session?.roomId);
 
@@ -62,21 +58,36 @@ export default function GuestDashboard() {
         if (selectedTime) {
             requestLateCheckout();
             setShowCheckoutModal(false);
-            showToast(`Late checkout requested until ${selectedTime}!`);
+            showToast(tMsg("lateCheckoutRequested", { time: selectedTime }));
         }
     };
 
     // Today's upcoming activities — filtered for kids mode
     const now = new Date();
-    const currentHour = now.getHours();
     const upcomingActivities = React.useMemo(() => {
-        const activities = isKidsMode
-            ? MOCK_ACTIVITIES.filter(a => a.type === "kids")
-            : MOCK_ACTIVITIES;
-        return activities.flatMap(a =>
+        const currentHour = new Date().getHours();
+        const filteredActivities = isKidsMode
+            ? activities.filter(a => a.type === "kids")
+            : activities;
+        return filteredActivities.flatMap(a =>
             a.schedule.filter(e => parseInt(e.time) > currentHour).map(e => ({ ...e, emoji: a.emoji, activityTitle: a.title, activityId: a.id }))
         ).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 4);
-    }, [isKidsMode, currentHour]);
+    }, [isKidsMode, activities]);
+
+    // Explore resort items
+    const EXPLORE_ITEMS_ADULT = React.useMemo(() => [
+        { icon: Utensils, label: t("dining"), color: "from-orange-400 to-red-400", tab: "dining" },
+        { icon: Calendar, label: t("activities"), color: "from-blue-400 to-cyan-400", tab: "activities" },
+        { icon: Dumbbell, label: t("fitness"), color: "from-emerald-400 to-teal-400", tab: "fitness" },
+        { icon: Sparkles, label: t("spa"), color: "from-purple-400 to-pink-400", tab: "spa" },
+        { icon: Baby, label: t("kidsClub"), color: "from-yellow-400 to-orange-400", tab: "kids" },
+        { icon: Car, label: t("carRental"), color: "from-gray-400 to-slate-400", tab: "cars" },
+    ], [t]);
+
+    const EXPLORE_ITEMS_KIDS = React.useMemo(() => [
+        { icon: Baby, label: t("kidsClub"), color: "from-yellow-400 to-orange-400", tab: "kids" },
+        { icon: Calendar, label: t("activities"), color: "from-blue-400 to-cyan-400", tab: "activities" },
+    ], [t]);
 
     const exploreItems = isKidsMode ? EXPLORE_ITEMS_KIDS : EXPLORE_ITEMS_ADULT;
 
@@ -102,12 +113,12 @@ export default function GuestDashboard() {
                     <div>
                         <h1 className="text-2xl font-bold text-[var(--color-text-main)]">
                             {isKidsMode
-                                ? `Hey ${session?.guestName?.split(" ")[0]}! 🎉🌟`
-                                : `Hello, ${session?.guestName?.split(" ")[0]} 👋`
+                                ? t("helloKids", { name: session?.guestName?.split(" ")[0] || "" })
+                                : t("hello", { name: session?.guestName?.split(" ")[0] || "" })
                             }
                         </h1>
                         <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                            {isKidsMode ? "Let's explore and have fun! 🧸" : "What can we help you with today?"}
+                            {isKidsMode ? t("subtitleKids") : t("subtitle")}
                         </p>
                     </div>
                     <KidsModeToggle />
@@ -116,14 +127,14 @@ export default function GuestDashboard() {
                 {/* Your Stay Card */}
                 <motion.div variants={item} className="glass-panel-heavy rounded-3xl p-5">
                     <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-lg font-bold text-[var(--color-text-main)]">Your Stay</h3>
+                        <h3 className="text-lg font-bold text-[var(--color-text-main)]">{t("yourStay")}</h3>
                         <Badge variant="glass" className="text-[var(--color-text-muted)]">
                             <Clock className="w-3 h-3 mr-1" />
-                            {currentStay ? `Until ${new Date(currentStay.endDate).toLocaleDateString("en", { month: "short", day: "numeric" })}` : "5 nights"}
+                            {currentStay ? t("until", { date: new Date(currentStay.endDate).toLocaleDateString("en", { month: "short", day: "numeric" }) }) : t("nights")}
                         </Badge>
                     </div>
                     <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                        Checkout at 11:00 AM. Leave keycards on the table when departing.
+                        {t("checkoutInfo")}
                     </p>
                     <div className="flex gap-2 flex-wrap">
                         {!isKidsMode && (
@@ -134,19 +145,19 @@ export default function GuestDashboard() {
                                 onClick={() => setShowCheckoutModal(true)}
                             >
                                 <Key className="w-4 h-4 mr-1" />
-                                {lateCheckoutStatus === "pending" ? "Pending…" : lateCheckoutStatus === "approved" ? "Approved ✓" : "Late Checkout"}
+                                {lateCheckoutStatus === "pending" ? t("pending") : lateCheckoutStatus === "approved" ? t("approved") : t("lateCheckout")}
                             </Button>
                         )}
                         <Button variant="glass" size="sm" className="text-[var(--color-text-main)] border-[var(--color-surface-base)]" onClick={() => setShowMapModal(true)}>
-                            <Map className="w-4 h-4 mr-1" /> Resort Map
+                            <Map className="w-4 h-4 mr-1" /> {t("resortMap")}
                         </Button>
                     </div>
                 </motion.div>
 
-                {/* Explore Resort Grid — ABOVE quick actions */}
+                {/* Explore Resort Grid */}
                 <motion.div variants={item}>
                     <h3 className="text-base font-bold text-[var(--color-text-main)] mb-3 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-accent" /> Explore Resort
+                        <Sparkles className="w-4 h-4 text-accent" /> {t("exploreResort")}
                     </h3>
                     <div className={`grid gap-3 ${isKidsMode ? "grid-cols-2" : "grid-cols-3"}`}>
                         {exploreItems.map((it) => (
@@ -171,30 +182,30 @@ export default function GuestDashboard() {
                             <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
                                 <MessageCircle className="w-5 h-5 text-blue-500" />
                             </div>
-                            <span className="text-sm font-bold text-[var(--color-text-main)]">Chat with Reception</span>
-                            <span className="text-xs text-[var(--color-text-muted)]">Ask anything</span>
+                            <span className="text-sm font-bold text-[var(--color-text-main)]">{t("chatWithReception")}</span>
+                            <span className="text-xs text-[var(--color-text-muted)]">{t("askAnything")}</span>
                         </button>
 
                         <button onClick={() => router.push("/guest/tickets")} className="glass-panel rounded-2xl p-4 flex flex-col items-start gap-2 hover:bg-white/70 transition-colors text-left">
                             <div className="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
                                 <AlertTriangle className="w-5 h-5 text-rose-500" />
                             </div>
-                            <span className="text-sm font-bold text-[var(--color-text-main)]">Report Issue</span>
+                            <span className="text-sm font-bold text-[var(--color-text-main)]">{t("reportIssue")}</span>
                             {myTickets.length > 0 && (
-                                <span className="text-xs text-accent font-semibold">{myTickets.filter(t => t.status !== "Closed").length} open</span>
+                                <span className="text-xs text-accent font-semibold">{t("openCount", { count: myTickets.filter(t => t.status !== "Closed").length })}</span>
                             )}
                         </button>
                     </motion.div>
                 )}
 
                 {/* Kids Mode: Kids Club Schedule */}
-                {isKidsMode && (
+                {isKidsMode && kidsClub && (
                     <motion.div variants={item}>
                         <h3 className="text-base font-bold text-[var(--color-text-main)] mb-3 flex items-center gap-2">
-                            🧒 Today at Kids Club
+                            🧒 {t("todayKidsClub")}
                         </h3>
                         <div className="space-y-2">
-                            {MOCK_KIDS_CLUB.schedule.map((ev, i) => (
+                            {kidsClub.schedule.map((ev, i) => (
                                 <div key={i} className="glass-panel rounded-2xl px-4 py-3 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <span className="font-bold text-primary text-sm w-12">{ev.time}</span>
@@ -214,13 +225,13 @@ export default function GuestDashboard() {
                     <motion.div variants={item}>
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="text-base font-bold text-[var(--color-text-main)] flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-primary" /> Coming Up Today
+                                <Calendar className="w-4 h-4 text-primary" /> {t("comingUpToday")}
                             </h3>
-                            <button onClick={() => router.push("/guest/info")} className="text-xs font-bold text-primary">View All</button>
+                            <button onClick={() => router.push("/guest/info")} className="text-xs font-bold text-primary">{tCommon("viewAll")}</button>
                         </div>
                         <div className="space-y-2">
                             {upcomingActivities.map((ev, i) => {
-                                const activity = MOCK_ACTIVITIES.find(a => a.id === ev.activityId);
+                                const activity = activities.find(a => a.id === ev.activityId);
                                 return (
                                     <button
                                         key={i}
@@ -246,43 +257,45 @@ export default function GuestDashboard() {
                 )}
 
                 {/* Minidisco Banner */}
-                <motion.div variants={item}>
-                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 p-5">
-                        <div className="absolute top-0 right-0 text-6xl opacity-20 rotate-12 translate-x-2 -translate-y-2">🪩</div>
-                        <h3 className="text-lg font-black text-white">Minidisco Tonight! 🎶</h3>
-                        <p className="text-sm text-white/80 mt-1">Starts at {MOCK_KIDS_CLUB.minidiscoTime} • Main Stage</p>
-                        <p className="text-xs text-white/60 mt-2">All kids welcome — dance, games, and fun!</p>
-                    </div>
-                </motion.div>
+                {kidsClub && (
+                    <motion.div variants={item}>
+                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 p-5">
+                            <div className="absolute top-0 right-0 text-6xl opacity-20 rotate-12 translate-x-2 -translate-y-2">🪩</div>
+                            <h3 className="text-lg font-black text-white">{t("minidiscoTonight")}</h3>
+                            <p className="text-sm text-white/80 mt-1">{t("startsAt", { time: kidsClub.minidiscoTime })}</p>
+                            <p className="text-xs text-white/60 mt-2">{t("minidiscoDesc")}</p>
+                        </div>
+                    </motion.div>
+                )}
             </motion.div>
 
             {/* Late Checkout Modal */}
-            <Modal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} title="Request Late Checkout" size="sm">
+            <Modal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} title={t("lateCheckoutTitle")} size="sm">
                 <div className="p-6 space-y-4">
-                    <p className="text-sm text-gray-600">Select your preferred checkout time:</p>
+                    <p className="text-sm text-gray-600">{t("selectCheckoutTime")}</p>
                     <div className="grid grid-cols-3 gap-2">
-                        {["12:00", "13:00", "14:00"].map(t => (
+                        {["12:00", "13:00", "14:00"].map(time => (
                             <button
-                                key={t}
-                                onClick={() => setSelectedTime(t)}
-                                className={`py-3 rounded-2xl text-sm font-bold border-2 transition-all ${selectedTime === t ? "border-primary bg-primary/10 text-primary" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
+                                key={time}
+                                onClick={() => setSelectedTime(time)}
+                                className={`py-3 rounded-2xl text-sm font-bold border-2 transition-all ${selectedTime === time ? "border-primary bg-primary/10 text-primary" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
                             >
-                                {t}
+                                {time}
                             </button>
                         ))}
                     </div>
                     <Button variant="default" className="w-full bg-primary hover:bg-primary/90 text-white" onClick={handleLateCheckout} disabled={!selectedTime}>
-                        Submit Request
+                        {t("submitRequest")}
                     </Button>
-                    <p className="text-xs text-gray-400 text-center">Subject to availability. You&apos;ll receive a confirmation.</p>
+                    <p className="text-xs text-gray-400 text-center">{t("checkoutNote")}</p>
                 </div>
             </Modal>
 
             {/* Map Modal */}
-            <Modal isOpen={showMapModal} onClose={() => setShowMapModal(false)} title="Resort Map" size="lg">
+            <Modal isOpen={showMapModal} onClose={() => setShowMapModal(false)} title={t("resortMapTitle")} size="lg">
                 <div className="p-4 sm:p-6">
                     <ResortMap />
-                    <p className="text-xs text-gray-400 text-center mt-3">Tap a location for details</p>
+                    <p className="text-xs text-gray-400 text-center mt-3">{t("tapForDetails")}</p>
                 </div>
             </Modal>
 
@@ -297,11 +310,11 @@ export default function GuestDashboard() {
                         <div className="flex items-center gap-4 text-xs text-gray-400">
                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {selectedActivity.openTime} – {selectedActivity.closeTime}</span>
                             <Badge variant={selectedActivity.busyLevel === "high" ? "warning" : selectedActivity.busyLevel === "medium" ? "secondary" : "success"} className="text-[10px]">
-                                {selectedActivity.busyLevel === "high" ? "Busy" : selectedActivity.busyLevel === "medium" ? "Moderate" : "Available"}
+                                {selectedActivity.busyLevel === "high" ? tCommon("busy") : selectedActivity.busyLevel === "medium" ? tCommon("moderate") : tCommon("available")}
                             </Badge>
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-gray-800 mb-3">Today&apos;s Schedule</h4>
+                            <h4 className="text-sm font-bold text-gray-800 mb-3">{t("todaysSchedule")}</h4>
                             <div className="space-y-2">
                                 {selectedActivity.schedule.map((ev, i) => {
                                     const isBooked = userSchedule.includes(selectedActivity.id);
@@ -319,12 +332,12 @@ export default function GuestDashboard() {
                                                 size="sm"
                                                 onClick={() => {
                                                     addToSchedule(selectedActivity.id);
-                                                    showToast(`Added ${ev.name} to your schedule!`);
+                                                    showToast(tMsg("addedToSchedule", { name: ev.name }));
                                                 }}
                                                 disabled={isBooked}
                                                 className="text-xs"
                                             >
-                                                {isBooked ? "Booked ✓" : "Book"}
+                                                {isBooked ? tCommon("booked") : tCommon("book")}
                                             </Button>
                                         </div>
                                     );

@@ -1,14 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useHotel } from "@/contexts/HotelContext";
 import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
-import { Plus, Trash2, MessageSquare } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 export default function AdminStaysPage() {
     const { stays, rooms, addStay, deleteStay } = useHotel();
     const { showToast } = useToast();
+    const t = useTranslations("admin");
+    const tCommon = useTranslations("common");
     const [showAdd, setShowAdd] = React.useState(false);
     const [newRoom, setNewRoom] = React.useState("");
     const [newName, setNewName] = React.useState("");
@@ -24,7 +27,7 @@ export default function AdminStaysPage() {
         });
         setShowAdd(false);
         setNewName(""); setNewDob(""); setNewRoom("");
-        showToast("Stay added!");
+        showToast(t("stayAdded"));
     };
 
     const getRoomNumber = (roomId: string) => rooms.find(r => r.id === roomId)?.number || "?";
@@ -32,9 +35,9 @@ export default function AdminStaysPage() {
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Stay Management</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t("stayManagement")}</h1>
                 <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
-                    <Plus className="w-4 h-4" /> Add Stay
+                    <Plus className="w-4 h-4" /> {t("addStay")}
                 </button>
             </div>
 
@@ -42,12 +45,12 @@ export default function AdminStaysPage() {
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Guest</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Room</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Check-in</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">Check-out</th>
-                            <th className="text-left px-4 py-3 font-semibold text-gray-600">DOB</th>
-                            <th className="text-right px-4 py-3 font-semibold text-gray-600">Actions</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{tCommon("guest")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{tCommon("room")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{t("checkIn")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{t("checkOut")}</th>
+                            <th className="text-left px-4 py-3 font-semibold text-gray-600">{t("dob")}</th>
+                            <th className="text-right px-4 py-3 font-semibold text-gray-600">{tCommon("actions")}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,7 +62,7 @@ export default function AdminStaysPage() {
                                 <td className="px-4 py-3 text-gray-600">{s.endDate}</td>
                                 <td className="px-4 py-3 text-gray-400 text-xs">{s.guestDob}</td>
                                 <td className="px-4 py-3 text-right">
-                                    <button onClick={() => { deleteStay(s.id); showToast("Stay removed."); }} className="text-gray-400 hover:text-red-500 p-1"><Trash2 className="w-4 h-4" /></button>
+                                    <button onClick={() => { deleteStay(s.id); showToast(t("stayRemoved")); }} className="text-gray-400 hover:text-red-500 p-1"><Trash2 className="w-4 h-4" /></button>
                                 </td>
                             </tr>
                         ))}
@@ -67,42 +70,42 @@ export default function AdminStaysPage() {
                 </table>
             </div>
 
-            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Register New Stay" size="md">
+            <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title={t("registerNewStay")} size="md">
                 <div className="p-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs font-semibold text-gray-500 block mb-1">Guest Name</label>
-                            <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Full name"
+                            <label className="text-xs font-semibold text-gray-500 block mb-1">{t("guestName")}</label>
+                            <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t("fullName")}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" />
                         </div>
                         <div>
-                            <label className="text-xs font-semibold text-gray-500 block mb-1">Date of Birth</label>
+                            <label className="text-xs font-semibold text-gray-500 block mb-1">{t("dateOfBirth")}</label>
                             <input type="date" value={newDob} onChange={(e) => setNewDob(e.target.value)}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" />
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-semibold text-gray-500 block mb-1">Room</label>
+                        <label className="text-xs font-semibold text-gray-500 block mb-1">{tCommon("room")}</label>
                         <select value={newRoom} onChange={(e) => setNewRoom(e.target.value)}
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800">
-                            <option value="">Select room...</option>
-                            {rooms.map(r => <option key={r.id} value={r.id}>Room {r.number} (Floor {r.floor})</option>)}
+                            <option value="">{t("selectRoom")}</option>
+                            {rooms.map(r => <option key={r.id} value={r.id}>{tCommon("room")} {r.number} ({tCommon("floor")} {r.floor})</option>)}
                         </select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs font-semibold text-gray-500 block mb-1">Check-in</label>
+                            <label className="text-xs font-semibold text-gray-500 block mb-1">{t("checkIn")}</label>
                             <input type="date" value={newStart} onChange={(e) => setNewStart(e.target.value)}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" />
                         </div>
                         <div>
-                            <label className="text-xs font-semibold text-gray-500 block mb-1">Check-out</label>
+                            <label className="text-xs font-semibold text-gray-500 block mb-1">{t("checkOut")}</label>
                             <input type="date" value={newEnd} onChange={(e) => setNewEnd(e.target.value)}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" />
                         </div>
                     </div>
                     <button onClick={handleAdd} className="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-blue-700" disabled={!newRoom || !newName.trim()}>
-                        Register Stay
+                        {t("registerStay")}
                     </button>
                 </div>
             </Modal>

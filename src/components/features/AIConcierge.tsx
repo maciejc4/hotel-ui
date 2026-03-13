@@ -2,17 +2,21 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { AI_RESPONSES } from "@/lib/mockData";
+import { Sparkles, Send, X, MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { fetchAIResponses } from "@/services/api";
 
 export function AIConcierge() {
     const [isOpen, setIsOpen] = React.useState(false);
-    const [messages, setMessages] = React.useState<{ text: string; isBot: boolean }[]>([
-        { text: "Hi there! I'm your AI Concierge. Ask me about restaurants, activities, SPA, or anything else! ✨", isBot: true },
-    ]);
+    const [messages, setMessages] = React.useState<{ id: string; role: "user" | "ai"; text: string }[]>([]);
     const [input, setInput] = React.useState("");
+    const [aiResponses, setAiResponses] = React.useState<string[]>([]);
     const scrollRef = React.useRef<HTMLDivElement>(null);
+    const t = useTranslations("ai");
+
+    React.useEffect(() => {
+        fetchAIResponses().then(setAiResponses).catch(console.error);
+    }, []);
 
     React.useEffect(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -20,63 +24,72 @@ export function AIConcierge() {
 
     const handleSend = () => {
         if (!input.trim()) return;
-        setMessages((prev) => [...prev, { text: input, isBot: false }]);
+        const userMsg = { id: `u-${Date.now()}`, role: "user" as const, text: input };
+        setMessages(prev => [...prev, userMsg]);
         setInput("");
+
         setTimeout(() => {
-            const randomResponse = AI_RESPONSES[Math.floor(Math.random() * AI_RESPONSES.length)];
-            setMessages((prev) => [...prev, { text: randomResponse, isBot: true }]);
+            const randomResponse = aiResponses.length > 0
+                ? aiResponses[Math.floor(Math.random() * aiResponses.length)]
+                : "I'm happy to help! Could you please provide more details?";
+            setMessages(prev => [...prev, { id: `a-${Date.now()}`, role: "ai", text: randomResponse }]);
         }, 1200);
     };
 
     return (
         <>
-            {/* FAB — positioned above bottom tab bar */}
-            <div className="fixed bottom-28 right-4 z-50">
-                <Button
-                    variant="default"
-                    size="icon"
-                    className="w-14 h-14 rounded-full shadow-2xl bg-gradient-to-br from-primary to-accent border-0 glow-primary hover:scale-105 active:scale-95 transition-transform text-white"
-                    onClick={() => setIsOpen(true)}
-                >
-                    <Sparkles className="w-6 h-6" />
-                </Button>
-            </div>
+            {/* FAB */}
+            <button
+                onClick={() => setIsOpen(true)}
+                className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center shadow-xl glow-primary"
+            >
+                <Sparkles className="w-6 h-6" />
+            </button>
 
+            {/* Fullscreen Overlay */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        initial={{ opacity: 0, y: "100%" }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed inset-x-2 bottom-20 sm:bottom-28 sm:right-4 sm:left-auto sm:w-[380px] h-[500px] max-h-[70vh] glass-panel-heavy rounded-3xl overflow-hidden shadow-2xl z-50 flex flex-col"
+                        className="fixed inset-0 z-50 bg-white/95 backdrop-blur-xl flex flex-col"
                     >
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-primary to-accent p-4 flex justify-between items-center text-white">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="w-5 h-5" />
-                                <h3 className="font-bold">AI Concierge</h3>
+                        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                                    <Sparkles className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-900">{t("aiConcierge")}</h3>
+                                    <p className="text-[10px] text-gray-400">AI Powered</p>
+                                </div>
                             </div>
-                            <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">
-                                <X className="w-5 h-5" />
+                            <button onClick={() => setIsOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                <X className="w-4 h-4 text-gray-500" />
                             </button>
                         </div>
 
-                        {/* Chat Area */}
-                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-gray-50/80">
-                            {messages.map((msg, idx) => (
+                        {/* Messages */}
+                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+                            {messages.length === 0 && (
+                                <div className="text-center py-8">
+                                    <Sparkles className="w-10 h-10 text-primary/30 mx-auto mb-3" />
+                                    <p className="text-sm text-gray-500">{t("greeting")}</p>
+                                </div>
+                            )}
+                            {messages.map(msg => (
                                 <motion.div
+                                    key={msg.id}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    key={idx}
-                                    className={`flex gap-2 ${msg.isBot ? "flex-row" : "flex-row-reverse"}`}
+                                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                                 >
-                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${msg.isBot ? "bg-primary" : "bg-accent"}`}>
-                                        {msg.isBot ? <Bot size={12} className="text-white" /> : <User size={12} className="text-white" />}
-                                    </div>
-                                    <div className={`px-4 py-2.5 rounded-2xl max-w-[80%] text-sm ${msg.isBot
-                                            ? "bg-white text-[var(--color-text-main)] rounded-tl-sm shadow-sm border border-gray-100"
-                                            : "bg-primary text-white rounded-tr-sm"
+                                    <div className={`px-4 py-3 rounded-2xl max-w-[80%] text-sm ${msg.role === "user"
+                                            ? "bg-primary text-white rounded-tr-sm"
+                                            : "bg-gray-100 text-gray-800 rounded-tl-sm"
                                         }`}>
                                         {msg.text}
                                     </div>
@@ -84,19 +97,23 @@ export function AIConcierge() {
                             ))}
                         </div>
 
-                        {/* Input Area */}
-                        <div className="p-3 bg-white border-t border-gray-200 flex gap-2">
+                        {/* Input */}
+                        <div className="p-4 border-t border-gray-100 flex gap-2">
                             <input
                                 type="text"
-                                placeholder="Ask me anything..."
-                                className="flex-1 bg-gray-50 rounded-full px-4 py-2.5 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                placeholder={t("askAnything")}
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                                className="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
-                            <Button variant="default" size="icon" className="rounded-full shrink-0 bg-primary text-white" onClick={handleSend} disabled={!input.trim()}>
-                                <Send className="w-4 h-4" />
-                            </Button>
+                            <button
+                                onClick={handleSend}
+                                disabled={!input.trim()}
+                                className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-50 shadow-md"
+                            >
+                                <Send className="w-5 h-5" />
+                            </button>
                         </div>
                     </motion.div>
                 )}

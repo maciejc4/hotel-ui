@@ -1,130 +1,132 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
-import { Plus, AlertTriangle, Clock, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, AlertTriangle, Clock, CheckCircle2, MessageCircle, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useHotel } from "@/contexts/HotelContext";
+import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { useHotel } from "@/contexts/HotelContext";
-import { useToast } from "@/components/ui/toast";
-import { TICKET_CATEGORIES } from "@/lib/mockData";
+import { useGuestSession } from "@/hooks/useGuestSession";
+import { getTicketStatusVariant } from "@/lib/statusColor";
+import { fetchTicketCategories } from "@/services/api";
 import { useRouter } from "next/navigation";
 
 export default function GuestTicketsPage() {
-    const router = useRouter();
     const { tickets, addTicket } = useHotel();
     const { showToast } = useToast();
-    const [showReportModal, setShowReportModal] = React.useState(false);
-    const [category, setCategory] = React.useState("");
-    const [description, setDescription] = React.useState("");
+    const session = useGuestSession();
+    const router = useRouter();
+    const t = useTranslations("tickets");
 
-    const session = React.useMemo(() => {
-        if (typeof window === "undefined") return null;
-        const data = localStorage.getItem("guestSession");
-        return data ? JSON.parse(data) : null;
+    const [showReport, setShowReport] = React.useState(false);
+    const [category, setCategory] = React.useState("");
+    const [issue, setIssue] = React.useState("");
+    const [categories, setCategories] = React.useState<string[]>([]);
+
+    React.useEffect(() => {
+        fetchTicketCategories().then(setCategories).catch(console.error);
     }, []);
 
     const myTickets = tickets.filter(t => t.roomId === session?.roomId);
 
-    const handleSubmitTicket = () => {
-        if (!category || !description.trim()) return;
-        const newTicket = {
-            id: `TCK-${String(tickets.length + 1).padStart(3, "0")}`,
+    const handleReport = () => {
+        if (!category || !issue.trim()) return;
+        addTicket({
+            id: `TCK-${Date.now().toString().slice(-6)}`,
             roomId: session?.roomId || "",
             category,
-            issue: description,
-            status: "New" as const,
+            issue,
+            status: "New",
             createdAt: new Date().toISOString(),
-            messages: [{
-                id: `msg-${Date.now()}`,
-                sender: "guest" as const,
-                text: description,
-                timestamp: new Date().toISOString(),
-            }],
-        };
-        addTicket(newTicket);
-        setShowReportModal(false);
+            messages: [{ id: `msg-${Date.now()}`, sender: "guest", text: issue, timestamp: new Date().toISOString() }],
+        });
+        setShowReport(false);
         setCategory("");
-        setDescription("");
-        showToast("Issue reported! Our team has been notified.");
+        setIssue("");
+        showToast(t("issueReported"), "success");
     };
 
-    const statusColor = (status: string) => {
-        switch (status) {
-            case "New": return "destructive";
-            case "In Progress": return "warning";
-            case "Closed": return "success";
-            default: return "secondary";
-        }
+    const statusIcons: Record<string, typeof AlertTriangle> = {
+        New: AlertTriangle,
+        "In Progress": Clock,
+        Closed: CheckCircle2,
     };
 
     return (
         <div className="px-4 py-6 max-w-2xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-xl font-bold text-[var(--color-text-main)]">My Tickets</h1>
-                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Report and track issues</p>
+                    <h1 className="text-xl font-bold text-[var(--color-text-main)]">{t("myTickets")}</h1>
+                    <p className="text-sm text-[var(--color-text-muted)]">{t("reportAndTrack")}</p>
                 </div>
-                <Button
-                    variant="default"
-                    size="sm"
-                    className="bg-gradient-to-r from-primary to-accent border-0 text-white glow-primary"
-                    onClick={() => setShowReportModal(true)}
-                >
-                    <Plus className="w-4 h-4 mr-1" /> Report Issue
+                <Button variant="default" size="sm" className="bg-primary text-white" onClick={() => setShowReport(true)}>
+                    <Plus className="w-4 h-4 mr-1" />
+                    {t("reportIssue")}
                 </Button>
             </div>
 
-            {myTickets.length === 0 ? (
-                <div className="text-center text-[var(--color-text-muted)] py-16">
-                    <AlertTriangle className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No issues reported</p>
-                    <p className="text-xs mt-1">Everything working? Great!</p>
-                </div>
-            ) : (
-                <div className="space-y-3">
-                    {myTickets.map((ticket, idx) => (
-                        <motion.button
-                            key={ticket.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                            onClick={() => router.push(`/guest/tickets/${ticket.id}`)}
-                            className="w-full text-left glass-panel rounded-2xl p-4 hover:bg-white/70 transition-colors"
+            {/* Ticket List */}
+            <div className="space-y-3">
+                <AnimatePresence>
+                    {myTickets.length === 0 && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="glass-panel rounded-2xl p-8 text-center"
                         >
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-mono font-bold text-[var(--color-text-muted)]">{ticket.id}</span>
-                                    <Badge variant={statusColor(ticket.status)} className="text-[10px]">{ticket.status}</Badge>
+                            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
+                            <p className="text-sm font-medium text-[var(--color-text-main)]">{t("noIssuesReported")}</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t("everythingWorking")}</p>
+                        </motion.div>
+                    )}
+                    {myTickets.map((ticket) => {
+                        const StatusIcon = statusIcons[ticket.status] || AlertTriangle;
+                        return (
+                            <motion.button
+                                key={ticket.id}
+                                layout
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                onClick={() => router.push(`/guest/tickets/${ticket.id}`)}
+                                className="w-full text-left glass-panel rounded-2xl p-4 hover:bg-white/70 transition-colors"
+                            >
+                                <div className="flex items-start gap-3">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${ticket.status === "New" ? "bg-red-50" : ticket.status === "In Progress" ? "bg-yellow-50" : "bg-emerald-50"}`}>
+                                        <StatusIcon className={`w-5 h-5 ${ticket.status === "New" ? "text-red-500" : ticket.status === "In Progress" ? "text-yellow-500" : "text-emerald-500"}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <span className="text-[10px] font-mono font-bold text-[var(--color-text-muted)]">{ticket.id}</span>
+                                            <Badge variant={getTicketStatusVariant(ticket.status)} className="text-[10px]">{ticket.status}</Badge>
+                                        </div>
+                                        <p className="text-sm font-semibold text-[var(--color-text-main)] truncate">{ticket.issue}</p>
+                                        <div className="flex items-center gap-3 mt-1 text-xs text-[var(--color-text-muted)]">
+                                            <span>{ticket.category}</span>
+                                            <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" />{ticket.messages.length}</span>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-[var(--color-text-muted)] mt-2" />
                                 </div>
-                                <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                            </div>
-                            <p className="text-sm font-semibold text-[var(--color-text-main)]">{ticket.issue}</p>
-                            <div className="flex items-center gap-2 mt-2 text-xs text-[var(--color-text-muted)]">
-                                <Clock className="w-3 h-3" />
-                                <span>{new Date(ticket.createdAt).toLocaleString()}</span>
-                                <Badge variant="glass" className="text-[10px] text-[var(--color-text-muted)] ml-auto">{ticket.category}</Badge>
-                            </div>
-                        </motion.button>
-                    ))}
-                </div>
-            )}
+                            </motion.button>
+                        );
+                    })}
+                </AnimatePresence>
+            </div>
 
             {/* Report Issue Modal */}
-            <Modal isOpen={showReportModal} onClose={() => setShowReportModal(false)} title="Report an Issue" size="md">
-                <div className="p-6 space-y-5">
+            <Modal isOpen={showReport} onClose={() => setShowReport(false)} title={t("reportAnIssue")} size="sm">
+                <div className="p-6 space-y-4">
                     <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Category</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {TICKET_CATEGORIES.map(cat => (
+                        <label className="text-xs font-semibold text-gray-500 block mb-2">{t("selectCategory")}</label>
+                        <div className="flex flex-wrap gap-2">
+                            {categories.map(cat => (
                                 <button
                                     key={cat}
                                     onClick={() => setCategory(cat)}
-                                    className={`py-2.5 rounded-xl text-xs font-semibold border-2 transition-all ${category === cat
-                                            ? "border-primary bg-primary/10 text-primary"
-                                            : "border-gray-200 text-gray-500 hover:border-gray-300"
-                                        }`}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${category === cat ? "bg-primary/10 border-primary text-primary" : "border-gray-200 text-gray-500"}`}
                                 >
                                     {cat}
                                 </button>
@@ -132,22 +134,16 @@ export default function GuestTicketsPage() {
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Description</label>
                         <textarea
                             rows={3}
-                            placeholder="Describe the issue..."
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-gray-800"
+                            placeholder={t("describeIssue")}
+                            value={issue}
+                            onChange={(e) => setIssue(e.target.value)}
+                            className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                         />
                     </div>
-                    <Button
-                        variant="default"
-                        className="w-full bg-primary hover:bg-primary/90 text-white"
-                        onClick={handleSubmitTicket}
-                        disabled={!category || !description.trim()}
-                    >
-                        Submit Report
+                    <Button variant="default" className="w-full bg-primary text-white" onClick={handleReport} disabled={!category || !issue.trim()}>
+                        {t("submitReport")}
                     </Button>
                 </div>
             </Modal>

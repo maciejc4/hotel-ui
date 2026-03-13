@@ -1,12 +1,17 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
-import {
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import type {
     Ticket, Conversation, ChatMessage, Room, Stay, StaffMember, HotelBranding,
-    MOCK_TICKETS, MOCK_MESSAGES, MOCK_ROOMS, MOCK_STAYS, MOCK_STAFF, MOCK_BRANDING,
-} from "@/lib/mockData";
+} from "@/types";
+import {
+    fetchBranding, fetchRooms, fetchStays, fetchStaff,
+    fetchTickets, fetchConversations,
+} from "@/services/api";
 
+// ─── State Shape ─────────────────────────────────────
 interface HotelState {
+    isLoading: boolean;
     branding: HotelBranding;
     rooms: Room[];
     stays: Stay[];
@@ -17,6 +22,7 @@ interface HotelState {
     userSchedule: string[];
 }
 
+// ─── Context Interface ───────────────────────────────
 interface HotelContextType extends HotelState {
     updateBranding: (b: Partial<HotelBranding>) => void;
     addRoom: (room: Room) => void;
@@ -35,22 +41,62 @@ interface HotelContextType extends HotelState {
     removeFromSchedule: (activityId: string) => void;
 }
 
+const DEFAULT_BRANDING: HotelBranding = { name: "", logoUrl: "", languages: ["en"] };
+
 const HotelContext = createContext<HotelContextType | null>(null);
 
 export function HotelProvider({ children }: { children: React.ReactNode }) {
-    const [branding, setBranding] = useState<HotelBranding>(() => ({ ...MOCK_BRANDING }));
-    const [rooms, setRooms] = useState<Room[]>(() => [...MOCK_ROOMS]);
-    const [stays, setStays] = useState<Stay[]>(() => [...MOCK_STAYS]);
-    const [staff, setStaff] = useState<StaffMember[]>(() => [...MOCK_STAFF]);
-    const [tickets, setTickets] = useState<Ticket[]>(() => MOCK_TICKETS.map(t => ({ ...t, messages: [...t.messages] })));
-    const [conversations, setConversations] = useState<Conversation[]>(() => MOCK_MESSAGES.map(c => ({ ...c, messages: [...c.messages] })));
+    const [isLoading, setIsLoading] = useState(true);
+    const [branding, setBranding] = useState<HotelBranding>(DEFAULT_BRANDING);
+    const [rooms, setRooms] = useState<Room[]>([]);
+    const [stays, setStays] = useState<Stay[]>([]);
+    const [staff, setStaff] = useState<StaffMember[]>([]);
+    const [tickets, setTickets] = useState<Ticket[]>([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
     const [lateCheckoutStatus, setLateCheckoutStatus] = useState<null | "pending" | "approved">(null);
     const [userSchedule, setUserSchedule] = useState<string[]>([]);
 
+    // ─── Load data from mock backend on mount ─────────
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadAll() {
+            try {
+                const [brandingData, roomsData, staysData, staffData, ticketsData, convsData] =
+                    await Promise.all([
+                        fetchBranding(),
+                        fetchRooms(),
+                        fetchStays(),
+                        fetchStaff(),
+                        fetchTickets(),
+                        fetchConversations(),
+                    ]);
+
+                if (cancelled) return;
+
+                setBranding(brandingData);
+                setRooms(roomsData);
+                setStays(staysData);
+                setStaff(staffData);
+                setTickets(ticketsData);
+                setConversations(convsData);
+            } catch (error) {
+                console.error("Failed to load hotel data:", error);
+            } finally {
+                if (!cancelled) setIsLoading(false);
+            }
+        }
+
+        loadAll();
+        return () => { cancelled = true; };
+    }, []);
+
+    // ─── Branding ─────────────────────────────────────
     const updateBranding = useCallback((b: Partial<HotelBranding>) => {
         setBranding(prev => ({ ...prev, ...b }));
     }, []);
 
+    // ─── Rooms ────────────────────────────────────────
     const addRoom = useCallback((room: Room) => {
         setRooms(prev => [...prev, room]);
     }, []);
@@ -59,6 +105,7 @@ export function HotelProvider({ children }: { children: React.ReactNode }) {
         setRooms(prev => prev.filter(r => r.id !== id));
     }, []);
 
+    // ─── Stays ────────────────────────────────────────
     const addStay = useCallback((stay: Stay) => {
         setStays(prev => [...prev, stay]);
     }, []);
@@ -67,10 +114,12 @@ export function HotelProvider({ children }: { children: React.ReactNode }) {
         setStays(prev => prev.filter(s => s.id !== id));
     }, []);
 
+    // ─── Staff ────────────────────────────────────────
     const addStaff = useCallback((s: StaffMember) => {
         setStaff(prev => [...prev, s]);
     }, []);
 
+    // ─── Tickets ──────────────────────────────────────
     const addTicket = useCallback((t: Ticket) => {
         setTickets(prev => [...prev, t]);
     }, []);
@@ -89,35 +138,41 @@ export function HotelProvider({ children }: { children: React.ReactNode }) {
         ));
     }, []);
 
+    // ─── Conversations ────────────────────────────────
     const addConversationMessage = useCallback((convId: string, msg: ChatMessage) => {
         setConversations(prev => prev.map(c =>
             c.id === convId ? { ...c, messages: [...c.messages, msg], unread: msg.sender === "guest" ? c.unread + 1 : 0 } : c
         ));
     }, []);
 
-    // Fixed: uses functional setState to avoid stale closure over `conversations`
+    // Use a ref to avoid the anti-pattern of returning a value from setState
+    const conversationsRef = React.useRef(conversations);
+    conversationsRef.current = conversations;
+
     const getOrCreateConversation = useCallback((roomId: string, guestName: string): Conversation => {
-        let result: Conversation | undefined;
-        setConversations(prev => {
-            const existing = prev.find(c => c.roomId === roomId);
-            if (existing) {
-                result = existing;
-                return prev; // no state change
-            }
-            const newConv: Conversation = {
-                id: `conv-${Date.now()}`, roomId, guestName, messages: [], unread: 0,
-            };
-            result = newConv;
-            return [...prev, newConv];
-        });
-        return result!;
+        const existing = conversationsRef.current.find(c => c.roomId === roomId);
+        if (existing) return existing;
+
+        const newConv: Conversation = {
+            id: `conv-${Date.now()}`, roomId, guestName, messages: [], unread: 0,
+        };
+        setConversations(prev => [...prev, newConv]);
+        return newConv;
     }, []);
 
+    // ─── Late Checkout ────────────────────────────────
     const requestLateCheckout = useCallback(() => {
         setLateCheckoutStatus("pending");
-        setTimeout(() => setLateCheckoutStatus("approved"), 5000);
     }, []);
 
+    // Handle late checkout approval with proper cleanup
+    useEffect(() => {
+        if (lateCheckoutStatus !== "pending") return;
+        const timer = setTimeout(() => setLateCheckoutStatus("approved"), 5000);
+        return () => clearTimeout(timer);
+    }, [lateCheckoutStatus]);
+
+    // ─── Schedule ─────────────────────────────────────
     const addToSchedule = useCallback((activityId: string) => {
         setUserSchedule(prev => prev.includes(activityId) ? prev : [...prev, activityId]);
     }, []);
@@ -126,15 +181,15 @@ export function HotelProvider({ children }: { children: React.ReactNode }) {
         setUserSchedule(prev => prev.filter(id => id !== activityId));
     }, []);
 
-    // Memoize context value to prevent unnecessary re-renders
+    // ─── Memoized context value ───────────────────────
     const value = useMemo<HotelContextType>(() => ({
-        branding, rooms, stays, staff, tickets, conversations, lateCheckoutStatus, userSchedule,
+        isLoading, branding, rooms, stays, staff, tickets, conversations, lateCheckoutStatus, userSchedule,
         updateBranding, addRoom, deleteRoom, addStay, deleteStay, addStaff,
         addTicket, updateTicketStatus, assignTicket, addTicketMessage,
         addConversationMessage, getOrCreateConversation,
         requestLateCheckout, addToSchedule, removeFromSchedule,
     }), [
-        branding, rooms, stays, staff, tickets, conversations, lateCheckoutStatus, userSchedule,
+        isLoading, branding, rooms, stays, staff, tickets, conversations, lateCheckoutStatus, userSchedule,
         updateBranding, addRoom, deleteRoom, addStay, deleteStay, addStaff,
         addTicket, updateTicketStatus, assignTicket, addTicketMessage,
         addConversationMessage, getOrCreateConversation,

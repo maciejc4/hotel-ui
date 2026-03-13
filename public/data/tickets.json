@@ -1,0 +1,20 @@
+[
+    {
+        "id": "TCK-001", "roomId": "room-204", "category": "AC",
+        "issue": "Air conditioning not cooling properly",
+        "status": "In Progress", "assignedTo": "staff-2", "createdAt": "2026-03-12T14:30:00Z",
+        "messages": [
+            { "id": "msg-t1-1", "sender": "guest", "text": "The AC in our room makes noise but doesn't cool.", "timestamp": "2026-03-12T14:30:00Z" },
+            { "id": "msg-t1-2", "sender": "staff", "text": "Thank you for reporting. We'll send a technician within 30 minutes.", "timestamp": "2026-03-12T14:35:00Z" },
+            { "id": "msg-t1-3", "sender": "guest", "text": "Thank you! We'll wait.", "timestamp": "2026-03-12T14:36:00Z" }
+        ]
+    },
+    {
+        "id": "TCK-002", "roomId": "room-305", "category": "Plumbing",
+        "issue": "Bathroom sink draining slowly",
+        "status": "New", "createdAt": "2026-03-12T16:00:00Z",
+        "messages": [
+            { "id": "msg-t2-1", "sender": "guest", "text": "The sink in the bathroom is draining very slowly.", "timestamp": "2026-03-12T16:00:00Z" }
+        ]
+    }
+]

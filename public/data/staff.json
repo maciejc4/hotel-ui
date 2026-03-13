@@ -1,0 +1,4 @@
+[
+    { "id": "staff-1", "name": "Maria Kowalska", "email": "maria@azurebay.com", "role": "Admin" },
+    { "id": "staff-2", "name": "Jan Nowak", "email": "jan@azurebay.com", "role": "Staff" }
+]

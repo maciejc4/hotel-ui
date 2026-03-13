@@ -3,16 +3,18 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { LockKeyhole, ArrowRight, Globe } from "lucide-react";
+import { LockKeyhole, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useHotel } from "@/contexts/HotelContext";
+import { LanguageSwitcher } from "@/components/features/LanguageSwitcher";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { stays, rooms, branding } = useHotel();
+  const { stays, rooms, branding, isLoading } = useHotel();
   const [dob, setDob] = React.useState("");
   const [error, setError] = React.useState("");
-  const [detectedLang, setDetectedLang] = React.useState("en");
+  const t = useTranslations("login");
 
   // The room comes from QR scan — for demo, default to room-204
   const roomId = "room-204";
@@ -20,29 +22,17 @@ export default function OnboardingPage() {
   const stay = stays.find(s => s.roomId === roomId);
 
   React.useEffect(() => {
-    // Language detection
-    const savedLang = localStorage.getItem("lang");
-    if (savedLang) {
-      setDetectedLang(savedLang);
-    } else {
-      const browserLang = navigator.language.slice(0, 2);
-      const matched = branding.languages.includes(browserLang) ? browserLang : "en";
-      setDetectedLang(matched);
-      localStorage.setItem("lang", matched);
-    }
-    // Session check
     if (localStorage.getItem("guestSession")) {
       router.push("/guest");
     }
-  }, [router, branding.languages]);
+  }, [router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!dob.trim()) {
-      setError("Please enter the date of birth to verify your identity.");
+      setError(t("enterDob"));
       return;
     }
-    // Mock verification — any DOB works
     localStorage.setItem("guestSession", JSON.stringify({
       roomId,
       roomNumber: room?.number || "204",
@@ -51,6 +41,14 @@ export default function OnboardingPage() {
     }));
     router.push("/guest");
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen gradient-mesh flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen gradient-mesh flex items-center justify-center p-4 relative overflow-hidden">
@@ -73,7 +71,7 @@ export default function OnboardingPage() {
 
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Welcome to Room {room?.number || "204"}
+            {t("welcomeToRoom", { roomNumber: room?.number || "204" })}
           </h1>
           <p className="text-sm text-[var(--color-text-muted)] mt-2 font-medium">
             {branding.name}
@@ -83,7 +81,7 @@ export default function OnboardingPage() {
         {stay && (
           <div className="glass-panel rounded-2xl p-4 mb-6 text-center">
             <p className="text-sm text-[var(--color-text-muted)]">
-              Please verify your identity,{" "}
+              {t("verifyIdentity")}{" "}
               <span className="font-bold text-[var(--color-text-main)]">{stay.guestName}</span>
             </p>
           </div>
@@ -92,7 +90,7 @@ export default function OnboardingPage() {
         <form onSubmit={handleLogin} className="space-y-5">
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-wider font-bold text-[var(--color-text-muted)]">
-              Date of Birth
+              {t("dateOfBirth")}
             </label>
             <div className="relative">
               <LockKeyhole className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" />
@@ -107,14 +105,13 @@ export default function OnboardingPage() {
           </div>
 
           <Button type="submit" variant="default" size="lg" className="w-full h-14 text-base bg-gradient-to-r from-primary to-accent border-0 text-white glow-primary">
-            Access Your Stay
+            {t("accessYourStay")}
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </form>
 
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <Globe className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
-          <span className="text-xs text-[var(--color-text-muted)] font-medium uppercase">{detectedLang}</span>
+        <div className="flex items-center justify-center mt-6">
+          <LanguageSwitcher />
         </div>
       </motion.div>
     </div>

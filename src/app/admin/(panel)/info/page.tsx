@@ -1,24 +1,51 @@
 "use client";
 
 import * as React from "react";
-import { MOCK_RESTAURANTS, MOCK_ALACARTE, MOCK_ACTIVITIES, MOCK_SPA, MOCK_FITNESS, MOCK_KIDS_CLUB, MOCK_CAR_RENTAL } from "@/lib/mockData";
-import { Clock, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Clock } from "lucide-react";
+import {
+    fetchRestaurants, fetchAlaCarte, fetchActivities, fetchSpa,
+    fetchFitness, fetchKidsClub, fetchCarRental,
+} from "@/services/api";
+import type {
+    Restaurant, AlaCarteInfo, Activity, SpaTreatment,
+    FitnessClass, KidsClubInfo, CarRental,
+} from "@/types";
 
 const tabs = ["Gastronomy", "Activities", "Kids Club", "SPA", "Fitness", "A'la Carte", "Car Rental"];
 
 export default function AdminInfoPage() {
+    const t = useTranslations("admin");
+    const tCommon = useTranslations("common");
     const [activeTab, setActiveTab] = React.useState("Gastronomy");
+
+    const [restaurants, setRestaurants] = React.useState<Restaurant[]>([]);
+    const [alacarte, setAlacarte] = React.useState<AlaCarteInfo[]>([]);
+    const [activities, setActivities] = React.useState<Activity[]>([]);
+    const [spa, setSpa] = React.useState<SpaTreatment[]>([]);
+    const [fitness, setFitness] = React.useState<FitnessClass[]>([]);
+    const [kidsClub, setKidsClub] = React.useState<KidsClubInfo | null>(null);
+    const [carRental, setCarRental] = React.useState<CarRental[]>([]);
+
+    React.useEffect(() => {
+        fetchRestaurants().then(setRestaurants).catch(console.error);
+        fetchAlaCarte().then(setAlacarte).catch(console.error);
+        fetchActivities().then(setActivities).catch(console.error);
+        fetchSpa().then(setSpa).catch(console.error);
+        fetchFitness().then(setFitness).catch(console.error);
+        fetchKidsClub().then(setKidsClub).catch(console.error);
+        fetchCarRental().then(setCarRental).catch(console.error);
+    }, []);
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Hotel Information CMS</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">{t("hotelInfo")} CMS</h1>
             <p className="text-sm text-gray-500 mb-6">Manage content displayed to guests in the app.</p>
 
             <div className="flex gap-2 overflow-x-auto mb-6 border-b border-gray-200 pb-px">
                 {tabs.map(tab => (
                     <button key={tab} onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
-                            }`}>
+                        className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
                         {tab}
                     </button>
                 ))}
@@ -26,7 +53,7 @@ export default function AdminInfoPage() {
 
             {activeTab === "Gastronomy" && (
                 <div className="space-y-3">
-                    {MOCK_RESTAURANTS.map(r => (
+                    {restaurants.map(r => (
                         <div key={r.id} className="bg-white rounded-lg border border-gray-200 p-4">
                             <div className="flex justify-between items-start">
                                 <div>
@@ -46,7 +73,7 @@ export default function AdminInfoPage() {
 
             {activeTab === "Activities" && (
                 <div className="space-y-3">
-                    {MOCK_ACTIVITIES.map(a => (
+                    {activities.map(a => (
                         <div key={a.id} className="bg-white rounded-lg border border-gray-200 p-4">
                             <h3 className="font-semibold text-gray-900">{a.emoji} {a.title}</h3>
                             <p className="text-xs text-gray-500 mt-1">{a.description}</p>
@@ -64,16 +91,16 @@ export default function AdminInfoPage() {
                 </div>
             )}
 
-            {activeTab === "Kids Club" && (
+            {activeTab === "Kids Club" && kidsClub && (
                 <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
                     <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div><span className="text-xs text-gray-500 block">Hours</span><span className="font-semibold text-gray-900">{MOCK_KIDS_CLUB.openTime}–{MOCK_KIDS_CLUB.closeTime}</span></div>
-                        <div><span className="text-xs text-gray-500 block">Age Range</span><span className="font-semibold text-gray-900">{MOCK_KIDS_CLUB.ageRange}</span></div>
-                        <div><span className="text-xs text-gray-500 block">Minidisco</span><span className="font-semibold text-gray-900">{MOCK_KIDS_CLUB.minidiscoTime}</span></div>
+                        <div><span className="text-xs text-gray-500 block">Hours</span><span className="font-semibold text-gray-900">{kidsClub.openTime}–{kidsClub.closeTime}</span></div>
+                        <div><span className="text-xs text-gray-500 block">Age Range</span><span className="font-semibold text-gray-900">{kidsClub.ageRange}</span></div>
+                        <div><span className="text-xs text-gray-500 block">Minidisco</span><span className="font-semibold text-gray-900">{kidsClub.minidiscoTime}</span></div>
                     </div>
-                    <div><span className="text-xs text-gray-500 block">Drop-off Policy</span><p className="text-sm text-gray-700">{MOCK_KIDS_CLUB.dropOffPolicy}</p></div>
+                    <div><span className="text-xs text-gray-500 block">Drop-off Policy</span><p className="text-sm text-gray-700">{kidsClub.dropOffPolicy}</p></div>
                     <div className="space-y-1">
-                        {MOCK_KIDS_CLUB.schedule.map((ev, i) => (
+                        {kidsClub.schedule.map((ev, i) => (
                             <div key={i} className="flex items-center gap-2 text-xs text-gray-600"><span className="font-mono font-bold w-12">{ev.time}</span><span>{ev.name}</span><span className="text-gray-400 ml-auto">{ev.location}</span></div>
                         ))}
                     </div>
@@ -82,10 +109,10 @@ export default function AdminInfoPage() {
 
             {activeTab === "SPA" && (
                 <div className="space-y-3">
-                    {MOCK_SPA.map(s => (
+                    {spa.map(s => (
                         <div key={s.id} className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">
                             <div><h3 className="font-semibold text-gray-900">{s.name}</h3><p className="text-xs text-gray-500 mt-1">{s.duration} — {s.price}</p></div>
-                            <span className={`text-xs font-bold ${s.available ? "text-green-600" : "text-red-500"}`}>{s.available ? "Available" : "Full"}</span>
+                            <span className={`text-xs font-bold ${s.available ? "text-green-600" : "text-red-500"}`}>{s.available ? tCommon("available") : tCommon("full")}</span>
                         </div>
                     ))}
                 </div>
@@ -93,7 +120,7 @@ export default function AdminInfoPage() {
 
             {activeTab === "Fitness" && (
                 <div className="space-y-3">
-                    {MOCK_FITNESS.map(f => (
+                    {fitness.map(f => (
                         <div key={f.id} className="bg-white rounded-lg border border-gray-200 p-4">
                             <h3 className="font-semibold text-gray-900">{f.name}</h3>
                             <div className="flex gap-4 mt-1 text-xs text-gray-500">
@@ -106,7 +133,7 @@ export default function AdminInfoPage() {
 
             {activeTab === "A'la Carte" && (
                 <div className="space-y-3">
-                    {MOCK_ALACARTE.map(a => (
+                    {alacarte.map(a => (
                         <div key={a.id} className="bg-white rounded-lg border border-gray-200 p-4">
                             <h3 className="font-semibold text-gray-900">{a.name}</h3>
                             <p className="text-xs text-blue-600 font-semibold">{a.cuisine}</p>
@@ -122,10 +149,10 @@ export default function AdminInfoPage() {
 
             {activeTab === "Car Rental" && (
                 <div className="space-y-3">
-                    {MOCK_CAR_RENTAL.map(c => (
+                    {carRental.map(c => (
                         <div key={c.id} className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">
                             <div><h3 className="font-semibold text-gray-900">{c.model}</h3><p className="text-xs text-gray-500">{c.type} — {c.pricePerDay}/day</p></div>
-                            <span className={`text-xs font-bold ${c.available ? "text-green-600" : "text-red-500"}`}>{c.available ? "Available" : "Unavailable"}</span>
+                            <span className={`text-xs font-bold ${c.available ? "text-green-600" : "text-red-500"}`}>{c.available ? tCommon("available") : tCommon("unavailable")}</span>
                         </div>
                     ))}
                 </div>
